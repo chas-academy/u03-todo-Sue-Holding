@@ -1,0 +1,37 @@
+version: "3.1"
+
+services:
+  php:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - 80:80
+      volumes:
+        - .:/var/www/html/
+      environment:
+        - compose=true
+  
+  mariadb:
+      image: mariadb:latest
+      container_name: mariadbu03
+      restart: always
+      environment:
+        MYSQL_USER: mariadb
+        MYSQL_PASSWORD: mariadb
+        MYSQL_DATABASE: mariadb
+        MARIADB_ROOT_PASSWORD: mariadb
+      ports:
+        - 3306:3306
+      volumes:
+        - mariadb_data:/var/lib/mysql
+  
+  adminer:
+      image: adminer:latest
+      container_name: admineru03
+      restart: always
+      ports:
+        - 8080:8080
+
+volumes:
+  mariadb_data:
