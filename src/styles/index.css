@@ -1,0 +1,108 @@
+* {
+    box-sizing: border-box;
+  }
+  
+h1 {
+    color: rgb(198, 239, 245);
+    margin: 50px;
+    margin-left: 180px;
+    padding-top: 50px;
+    font-size: 2.5em;
+}
+
+body, html {
+    height: 100%;
+    background-color: rgb(4, 4, 131);
+    color: aliceblue;
+}
+
+.bg {
+    background-image: url("/src/images/Arrival_at_Hogwarts.jpg");
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    font-size: 1.5em;
+}
+
+
+a {
+    color: white;
+}
+
+@media (any-hover: hover) {
+    a:hover {
+        color: green;
+    }
+}
+
+
+
+@media (min-width: 1280px) {
+    .grid-container  {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(6, auto);
+    padding: 0;
+    height: 80px;
+    }
+
+
+    .bg  { 
+        grid-column: 1 / 3;
+        grid-row: 1 / 4;
+        width: 100%; 
+        
+    }
+     /* 1st child */
+     .header { 
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
+        width: 100%; 
+        padding-left: 50px;
+        height: 10px;
+
+    }
+
+     /* 2nd child */
+     .nav-bar { 
+        grid-column: 1 / 3;
+        grid-row: 2 / 3;
+        width: 100%; 
+    }
+
+    /* 3rd child */
+    .today-list { 
+        grid-column: 1 / 2;
+        grid-row: 3 / 4;
+        width: 100%; 
+        padding-left: 50px;  
+        height: 50px;
+    }
+
+    /* 4th child */
+    .sorting-hat { 
+        grid-column: 2 / 3;
+        grid-row: 3 / 4;
+        width: 100%; 
+        padding-left: 400px;
+        height: 50px;
+    }
+
+    .create-your-own  { 
+        grid-column: 1 / 2;
+        grid-row: 4 / 5;
+        width: 100%; 
+        
+       
+    }
+
+
+}
