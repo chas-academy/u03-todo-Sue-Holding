@@ -1,5 +1,7 @@
 <?php
 session_start(); // Start the session to store the welcome message
+include './db.php'; // Include the database connection file
+
 
 ?>
 
@@ -9,13 +11,14 @@ session_start(); // Start the session to store the welcome message
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to the Harry Potter Themed To Do List Web application!!</title>
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="../styles/index.css">
+
 </head>
 
 <body class="bg">
 
 <div class="grid-container">   
-<img class="bg" src="media/Arrival_at_Hogwarts.jpg" alt="arrival at hogwarts" width="auto">
+<img class="bg" src="../media/Arrival_at_Hogwarts.jpg" alt="arrival at hogwarts" width="auto">
 
 <header class="header">
 <h1>Welcome to the Harry Potter Themed To Do List Web application!!</h1>
@@ -47,8 +50,49 @@ if (isset($_SESSION['welcome_message'])) {
 
 <aside class="today-list">
     <h2>Dobby the Elf's Chores</h2>
-    <p>Mark Completed</p>
-<input type="radio" id="task1" name="harry_potter_task" value="task1">
+
+<?php
+    // Define allowed columns for sorting
+$allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
+$sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
+
+$stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+
+    <form method="GET" action="submit.php">
+        <label for="column">Sort by:</label>
+        <select id="Column" name="column">
+            <option value="Category">Category</option>
+            <option value="Daily">Daily</option>
+            <option value="House">House</option>
+            <option value="Christmas">Christmas</option>
+            <option value="Own">Own</option>
+        </select>
+        <input type="submit">
+        </form>
+
+
+<?php
+$stmt;
+$conn;
+$rows;
+
+// Check if a column is selected for sorting
+$sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
+$stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+// CRUD READ - View
+// call function to view all tasks
+displayTasks($rows);
+
+?>
+
+<!-- <input type="radio" id="task1" name="harry_potter_task" value="task1">
 <label for="task1">task 1</label><br>
 <input type="radio" id="task2" name="harry_potter_task" value="task2">
 <label for="task2">task 2</label><br>
@@ -59,7 +103,7 @@ if (isset($_SESSION['welcome_message'])) {
 <input type="radio" id="task5" name="harry_potter_task" value="task5">
 <label for="task5">task 5</label><br>
 <input type="radio" id="task6" name="harry_potter_task" value="task6">
-<label for="task6">task 6</label>
+<label for="task6">task 6</label> -->
 
 </aside>
 
@@ -137,7 +181,7 @@ if (isset($_SESSION['welcome_message'])) {
     autoplay
     loop
     preload="auto">
-  <source src="media/Harry_Potter_Themesong.mp3" type="audio/mp3" />
+  <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" />
 </footer>
 
 </div> 

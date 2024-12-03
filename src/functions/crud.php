@@ -1,5 +1,5 @@
 <?php
-require_once 'db.php';
+require_once '../db.php';
 echo "Hello world!!!"; 
 echo "<br>";
 
