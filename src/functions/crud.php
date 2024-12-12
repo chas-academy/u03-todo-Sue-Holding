@@ -5,8 +5,31 @@ echo "<br>";
 
 // function getTasks($conn) {
 //     $stmt = $conn->query('SELECT id, title, description, is_completed FROM tasks');
-//     return $stmt->fetchAll(;)
+//     return $stmt->fetchAll();
 // }
+
+// CRUD READ - View - this function views full database
+function displayTasks($conn) {
+
+// Check if a column is selected for sorting
+$sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
+$stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$output = ''; // Initialize output variable
+
+// Display the tasks
+foreach ($rows as $row) {
+  $output .= "Task: " . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
+  }
+  return $output; // Return the output string
+
+} 
+// Call function to view all tasks when 'view database' is pressed
+// if (isset($_GET['view_database'])) {
+//   displayTasks($conn);
+// }
+
 
 
 

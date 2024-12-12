@@ -52,7 +52,7 @@ if (isset($_SESSION['welcome_message'])) {
 
 
 <aside class="menu-list">
-    <h2><a href="#">View database</a></h2> <br>
+    <h2><a href="?view_database=true">View database</a></h2> <br>
     <h2><a href="#">Dobby's Today List</a></h2> <br>
     <h2><a href="#">View Completed</a></h2> <br>
     <h2><a href="#">Sorting Hat</a></h2> <br>
@@ -63,7 +63,13 @@ if (isset($_SESSION['welcome_message'])) {
 
 <main class="main-display">
     <div>
-        <p>here will show the crud funtion based from the menu selection</p>
+        <!-- the crud funtions based from the menu selection will show here -->
+        <?php
+    // Call function to view all tasks when 'view database' is pressed
+    if (isset($_GET['view_database'])) {
+        echo displayTasks($conn);
+    }
+    ?>
     </div>
 </main>
 
@@ -89,7 +95,7 @@ foreach ($tasks as $task); ?>
         <button>edit</button>
         <button>delete</button>
         <a href="./views/edit.php">edit</a> -->
-
+    </section>
 
 
 
@@ -117,6 +123,7 @@ foreach ($tasks as $task); ?>
         </form>
 
 
+        <!-- this function views full database -->
 <?php
 $stmt;
 $conn;
@@ -131,7 +138,6 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // CRUD READ - View
 // call function to view all tasks
 displayTasks($rows);
-
 ?>
 
 <!-- <input type="radio" id="task1" name="harry_potter_task" value="task1">

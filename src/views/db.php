@@ -22,12 +22,12 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // CRUD READ - View
 // Displaying the fetched data
 
-function displayTasks($rows) {
-foreach ($rows as $row) {
-    echo "Task ID: " . $row['TaskID'] . $row['Category'] . $row['House'] . $row['TaskType'] . $row['Description'] . "<br>";
+// function displayTasks($rows) {
+// foreach ($rows as $row) {
+//     echo "Task ID: " . $row['TaskID'] . $row['Category'] . $row['House'] . $row['TaskType'] . $row['Description'] . "<br>";
 
-}
-}
+// }
+// }
 
 
 // Define allowed columns for sorting
