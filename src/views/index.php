@@ -1,7 +1,7 @@
 <?php
 session_start(); // Start the session to store the welcome message
-include './db.php'; // Include the database connection file
-
+include 'db.php'; // Include the database connection file
+require '../functions/crud.php'; // to include sql stmt 
 
 ?>
 
@@ -17,11 +17,13 @@ include './db.php'; // Include the database connection file
 
 <body class="bg">
 
+<!-- start of my grid container -->
 <div class="grid-container">   
 <img class="bg" src="../media/Arrival_at_Hogwarts.jpg" alt="arrival at hogwarts" width="auto">
 
 <header class="header">
 <h1>Welcome to the Harry Potter Themed To Do List Web application!!</h1>
+<h2>What do you want to do today?</h2>
 
 <?php
 if (isset($_SESSION['welcome_message'])) {
@@ -32,6 +34,7 @@ if (isset($_SESSION['welcome_message'])) {
 
 </header>
 
+<!-- log in function -->
 <nav class="nav-bar">
 <?php if (!isset($_SESSION['user_logged_in'])): ?>
         <form method="POST" action="submit.php">
@@ -48,18 +51,57 @@ if (isset($_SESSION['welcome_message'])) {
 </nav>
 
 
-<aside class="today-list">
-    <h2>Dobby the Elf's Chores</h2>
+<aside class="menu-list">
+    <h2><a href="#">View database</a></h2> <br>
+    <h2><a href="#">Dobby's Today List</a></h2> <br>
+    <h2><a href="#">View Completed</a></h2> <br>
+    <h2><a href="#">Sorting Hat</a></h2> <br>
+    <h2><a href="#">Christmas Themed</a></h2> <br>
+    <h2><a href="#">Create Own Tasks</a></h2> <br>
+    
+</aside>
 
-<?php
-    // Define allowed columns for sorting
-$allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
-$sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
+<main class="main-display">
+    <div>
+        <p>here will show the crud funtion based from the menu selection</p>
+    </div>
+</main>
 
-$stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-$stmt->execute();
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
+<div class="today">
+    <h2>Dobby today list</h2>       
+    <?php 
+    $tasks = getTasks($conn);
+
+foreach ($tasks as $task); ?>
+
+<section class="today-list">
+    <!-- <h2 class="task-title">Dobby the Elf's Chores ?></h2> -->
+    <!-- <h2 class="task-title">
+        <?php echo htmlspecialchars($task['title']); ?></h2> 
+
+
+    <div class="task-info">
+        <p><?php echo htmlspecialchars($TaskType['id']); ?></p>
+        <input type="checkout"> <?php if ($task['is_completed']) echo 'checked'; ?>
+        <p class="task-description"><?php echo htmlspecialchars($task['description']); ?></p>
+    </div>
+    <div class="edit-containter">
+        <button>edit</button>
+        <button>delete</button>
+        <a href="./views/edit.php">edit</a> -->
+
+
+
+
+        <!-- not sure about this code -->
+    <!-- // Define allowed columns for sorting
+    // $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
+    // $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
+    
+    // $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+    // $stmt->execute();
+    // $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?> -->
 
 
     <form method="GET" action="submit.php">
@@ -105,9 +147,9 @@ displayTasks($rows);
 <input type="radio" id="task6" name="harry_potter_task" value="task6">
 <label for="task6">task 6</label> -->
 
-</aside>
+    </section>
 
-<section class="done-list">
+<!-- <section class="done-list">
     <h2>View Completed</h2>
     <ul>
         <li></li>
@@ -117,7 +159,7 @@ displayTasks($rows);
         <li></li>
     </ul>
 
-    </section>
+    </section> -->
 
 <aside class="sorting-hat">
     <h2>Sorting Hat</h2>

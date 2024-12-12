@@ -1,7 +1,33 @@
 <?php
-require_once '../db.php';
+require_once '../views/db.php';
 echo "Hello world!!!"; 
 echo "<br>";
+
+// function getTasks($conn) {
+//     $stmt = $conn->query('SELECT id, title, description, is_completed FROM tasks');
+//     return $stmt->fetchAll(;)
+// }
+
+
+
+function getTasks($conn) {
+  $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
+    $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
+    
+    $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+function getLists($conn) {
+    $stmt = $conn->query('SELECT id, title FROM lists');
+    return $stmt->fetchAll();
+}
+
+
+
+
 
 //  CREATE
 // to add a new customers
