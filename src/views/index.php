@@ -56,7 +56,7 @@ if (isset($_SESSION['welcome_message'])) {
     <h2><a href="#">Dobby's Today List</a></h2> <br>
     <h2><a href="#">View Completed</a></h2> <br>
     <h2><a href="#">Sorting Hat</a></h2> <br>
-    <h2><a href="#">Christmas Themed</a></h2> <br>
+    <h2><a href="?view_xmas=true">Christmas Themed</a></h2> <br>
     <h2><a href="#">Create Own Tasks</a></h2> <br>
     
 </aside>
@@ -69,6 +69,12 @@ if (isset($_SESSION['welcome_message'])) {
     if (isset($_GET['view_database'])) {
         echo displayTasks($conn);
     }
+
+    // call function to dispay xmas task
+    if (isset($_GET['view_xmas'])) {
+        echo displayXmas($conn);
+    }
+
     ?>
     </div>
 </main>

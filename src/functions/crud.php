@@ -3,11 +3,7 @@ require_once '../views/db.php';
 echo "Hello world!!!"; 
 echo "<br>";
 
-// function getTasks($conn) {
-//     $stmt = $conn->query('SELECT id, title, description, is_completed FROM tasks');
-//     return $stmt->fetchAll();
-// }
-
+// Start of VIEW DATABASE function
 // CRUD READ - View - this function views full database
 function displayTasks($conn) {
 
@@ -18,17 +14,44 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $output = ''; // Initialize output variable
 
-// Display the tasks
+// Loop to display all the tasks in the database
 foreach ($rows as $row) {
-  $output .= "Task: " . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
+  $output .= htmlspecialchars($row['Category']) . htmlspecialchars($row['House']) . htmlspecialchars($row['TaskType']) . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
   }
   return $output; // Return the output string
 
 } 
-// Call function to view all tasks when 'view database' is pressed
-// if (isset($_GET['view_database'])) {
-//   displayTasks($conn);
-// }
+// End of VIEW DATABASE function
+
+// Start of VIEW XMAS Themed tasks function
+function displayXmas($conn) {
+
+$sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Christmas'; // Default sorting column
+$stmt = $conn->query("SELECT * FROM Tasks WHERE Christmas = 1") ; // Assuming 'Christmas' is a boolean field
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$output = ''; // Initialize output variable
+
+// Loop to display all the tasks in the database
+foreach ($rows as $row) {
+  $output .= htmlspecialchars($row['Category']) . htmlspecialchars($row['House']) . htmlspecialchars($row['TaskType']) . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
+  }
+  return $output; // Return the output string
+
+}
+// End of VIEW XMAS function
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
