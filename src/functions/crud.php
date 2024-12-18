@@ -1,7 +1,7 @@
 <?php
 require_once '../views/db.php';
-echo "Hello world!!!"; 
-echo "<br>";
+// echo "Hello world!!!"; 
+// echo "<br>";
 
 // Start of VIEW DATABASE function
 // CRUD READ - View - this function views full database
@@ -12,12 +12,35 @@ $sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sor
 $stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$output = ''; // Initialize output variable
+$output = '<h2>All Database Tasks</h2><br>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>House</th>
+                  <th>Task Type</th>
+                  <th>Description</th>
+                  <th>Daily</th>
+                  <th>Christmas</th>
+                </tr>
+              </thead>
+ 
+ <tb>'; // Start a table
 
 // Loop to display all the tasks in the database
 foreach ($rows as $row) {
-  $output .= htmlspecialchars($row['Category']) . htmlspecialchars($row['House']) . htmlspecialchars($row['TaskType']) . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
+  $output .= '<tr>
+                <td>' . htmlspecialchars($row['Category']) . '</td>
+                <td>' . htmlspecialchars($row['House']) . '</td>
+                <td>' . htmlspecialchars($row['TaskType']) . '</td>
+                <td>' . htmlspecialchars($row['Description']) . '</td>
+                <td>' . htmlspecialchars($row['Daily']) . '</td>
+                <td>' . htmlspecialchars($row['Christmas']) . '</td>
+                </tr>';
+                // Example of displaying task name
   }
+
+  $output .= '</tbody><table>'; 
   return $output; // Return the output string
 
 } 
@@ -26,17 +49,36 @@ foreach ($rows as $row) {
 // Start of VIEW XMAS Themed tasks function
 function displayXmas($conn) {
 
-$sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Christmas'; // Default sorting column
+$sortColumn = isset($_GET['column']) ? htmlspecialchars($_GET['column']) : 'Christmas'; // Default sorting column
 $stmt = $conn->query("SELECT * FROM Tasks WHERE Christmas = 1") ; // Assuming 'Christmas' is a boolean field
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$output = ''; // Initialize output variable
+ // Output variable with a header
+ $output = '<h2>Christmas Themed Tasks</h2><br>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>House</th>
+                  <th>Task Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+ 
+ <tb>'; // Start a table
 
-// Loop to display all the tasks in the database
+// Loop to display all the tasks in the database in table format
 foreach ($rows as $row) {
-  $output .= htmlspecialchars($row['Category']) . htmlspecialchars($row['House']) . htmlspecialchars($row['TaskType']) . htmlspecialchars($row['Description']) . "<br>"; // Example of displaying task name
+  $output .= '<tr>
+                  <td>' . htmlspecialchars($row['Category']) . '</td>
+                  <td>' . htmlspecialchars($row['House']) . '</td> 
+                  <td>' . htmlspecialchars($row['TaskType']) . '</td> 
+                  <td>' . htmlspecialchars($row['Description']) . '</td>  
+               </tr>';   
   }
-  return $output; // Return the output string
+
+$output .= '</tbody><table>'; 
+return $output; // Return the output string
 
 }
 // End of VIEW XMAS function
@@ -56,20 +98,20 @@ foreach ($rows as $row) {
 
 
 
-function getTasks($conn) {
-  $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
-    $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
+// function getTasks($conn) {
+//   $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
+//     $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
     
-    $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+//     $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+//     $stmt->execute();
+//     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// }
 
 
-function getLists($conn) {
-    $stmt = $conn->query('SELECT id, title FROM lists');
-    return $stmt->fetchAll();
-}
+// function getLists($conn) {
+//     $stmt = $conn->query('SELECT id, title FROM lists');
+//     return $stmt->fetchAll();
+// }
 
 
 

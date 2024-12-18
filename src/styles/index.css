@@ -52,10 +52,14 @@ a {
     text-decoration: none;
 }
 
+table {
+    font-size: 1.5em;
+}
+
 @media (any-hover: hover) {
     a:hover {
-        color: aliceblue;
-        font-size: 1.5em;
+        color: green;
+        
     }
 }
 
@@ -65,18 +69,19 @@ a {
     .grid-container  {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(6, auto);
+    grid-template-rows: repeat(8, auto);
     padding: 0;
     /* height: 50px; */
     }
 
 
-    .bg  { 
+    /* .bg  { 
         grid-column: 1 / 4;
         grid-row: 1 / 4;
         width: 100%; 
         
-    }
+    } */
+
      /* 1st child */
      .header { 
         grid-column: 1 / 4;
@@ -88,19 +93,20 @@ a {
     }
 
      /* 2nd child */
-     .nav-bar { 
-        grid-column: 3 / 4;
+     .login { 
+        grid-column: 1 / 4;
         grid-row: 2 / 3;
         width: auto; 
-        height: 100px;
-        margin-top: -50px;
+        height: auto;
+        margin-top: 100px;
+        padding: 20px;
     }
 
     .menu-list {
         grid-column: 1 / 2;
-        grid-row: 2 / 4;
+        grid-row: 3 / 6;
         margin-left: 50px;
-        margin-top: 50px;
+        margin-top: 100px;
     
     }
 
@@ -109,8 +115,14 @@ a {
         grid-row: 2 / 4;
         height: auto;
         padding: 20px;
-        padding-top: 100px;
+        padding-top: 200px;
+        margin-left: -125px;
 
+    }
+
+    .extra {
+        grid-column: 1 / 3;
+        grid-row: 7 / 8;
     }
 
 }

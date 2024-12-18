@@ -1,5 +1,6 @@
 <?php
 session_start(); // Start the session to manage session variables
+require 'db.php';
 
 function sanitize_input($input) {
     $sanitized_input = htmlspecialchars($input);
@@ -17,6 +18,9 @@ function validate_name($input) {
     return "Welcome to the site, " . $input;
 }
 
+// if (!session_start()) {
+//     die("Session failed to start");
+// }
 
 // Process the form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -31,5 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: index.php");
     exit(); // Ensure no further code is executed
 }
+
+// if ($_SERVER["REQUEST_METHOD"] == "POST") {
+//     if (isset($_POST['name'])) {
+//         echo "Received Name: " . $_POST['name'];
+//     } else {
+//         echo "Name input is missing.";
+//     }
+//     exit;
+// }
 
 ?>

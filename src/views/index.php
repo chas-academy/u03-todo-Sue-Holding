@@ -15,30 +15,23 @@ require '../functions/crud.php'; // to include sql stmt
 
 </head>
 
+
+
 <body class="bg">
 
 <!-- start of my grid container -->
 <div class="grid-container">   
-<img class="bg" src="../media/Arrival_at_Hogwarts.jpg" alt="arrival at hogwarts" width="auto">
+<!-- <img class="bg" src="../media/hp_castle.jpg" alt="arrival at hogwarts" width="auto"> -->
 
 <header class="header">
 <h1>Welcome to the Harry Potter Themed To Do List Web application!!</h1>
-<h2>What do you want to do today?</h2>
-
-<?php
-if (isset($_SESSION['welcome_message'])) {
-    echo "<h2>" . $_SESSION['welcome_message'] . "</h2>";
-    // unset($_SESSION['welcome_message']); // Clear the message after displaying
-}
-?>
 
 </header>
 
 <!-- log in function -->
-<nav class="nav-bar">
+<nav class="login">
 <?php if (!isset($_SESSION['user_logged_in'])): ?>
         <form method="POST" action="submit.php">
-            <!-- <label for="name">Username:</label> -->
             <input type="text" id="name" name="name" placeholder="Enter your username" required>
             <button type="submit">Log In</button>
         </form>
@@ -47,18 +40,23 @@ if (isset($_SESSION['welcome_message'])) {
             <button type="submit">Log Out</button>
         </form>
     <?php endif; ?>
-            
+    <?php
+if (isset($_SESSION['welcome_message'])) {
+    echo "<h3>" . $_SESSION['welcome_message'] . "</h3>";
+    // unset($_SESSION['welcome_message']); // Clear the message after displaying
+}
+?>         
 </nav>
 
 
 <aside class="menu-list">
+    <h2>What do you want<br> to do today?</h2><br>
     <h2><a href="?view_database=true">View database</a></h2> <br>
     <h2><a href="#">Dobby's Today List</a></h2> <br>
     <h2><a href="#">View Completed</a></h2> <br>
     <h2><a href="#">Sorting Hat</a></h2> <br>
     <h2><a href="?view_xmas=true">Christmas Themed</a></h2> <br>
-    <h2><a href="#">Create Own Tasks</a></h2> <br>
-    
+    <h2><a href="#">Create Own Tasks</a></h2> <br> 
 </aside>
 
 <main class="main-display">
@@ -79,28 +77,34 @@ if (isset($_SESSION['welcome_message'])) {
     </div>
 </main>
 
-<div class="today">
+<!-- <div class="today">
     <h2>Dobby today list</h2>       
-    <?php 
-    $tasks = getTasks($conn);
+    
+    // $tasks = getTasks($conn);
 
-foreach ($tasks as $task); ?>
+// foreach ($tasks as $task); 
 
-<section class="today-list">
+<section class="today-list"> -->
     <!-- <h2 class="task-title">Dobby the Elf's Chores ?></h2> -->
     <!-- <h2 class="task-title">
-        <?php echo htmlspecialchars($task['title']); ?></h2> 
+     
+    
 
 
-    <div class="task-info">
+  <?php echo htmlspecialchars($task['title']); ?> -->
+<br>
+<div class="extra">
+
+    <!-- <div class="task-info">
         <p><?php echo htmlspecialchars($TaskType['id']); ?></p>
         <input type="checkout"> <?php if ($task['is_completed']) echo 'checked'; ?>
         <p class="task-description"><?php echo htmlspecialchars($task['description']); ?></p>
-    </div>
+    </div> -->
+    <br>
     <div class="edit-containter">
         <button>edit</button>
         <button>delete</button>
-        <a href="./views/edit.php">edit</a> -->
+        <a href="./views/edit.php">edit</a> 
     </section>
 
 
@@ -143,7 +147,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // CRUD READ - View
 // call function to view all tasks
-displayTasks($rows);
+// displayTasks($rows);
 ?>
 
 <!-- <input type="radio" id="task1" name="harry_potter_task" value="task1">
@@ -234,12 +238,14 @@ displayTasks($rows);
     height="100"
     autoplay
     loop
-    preload="auto">
+    preload="off">
   <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" />
 </footer>
 
 </div> 
+</div>
 <!-- end of grid container -->
+
 
 </body>
 </html>
