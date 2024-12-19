@@ -21,10 +21,10 @@ require '../functions/crud.php'; // to include sql stmt
 
 <!-- start of my grid container -->
 <div class="grid-container">   
-<!-- <img class="bg" src="../media/hp_castle.jpg" alt="arrival at hogwarts" width="auto"> -->
+<img class="bg" src="../media/HP_banner.webp" alt="hogwarts" width="auto">
 
 <header class="header">
-<h1>Welcome to the Harry Potter Themed To Do List Web application!!</h1>
+<!-- <h1>Welcome to the Harry Potter Themed To Do List Web application!!</h1> -->
 
 </header>
 
@@ -60,7 +60,7 @@ if (isset($_SESSION['welcome_message'])) {
 </aside>
 
 <main class="main-display">
-    <div>
+    
         <!-- the crud funtions based from the menu selection will show here -->
         <?php
     // Call function to view all tasks when 'view database' is pressed
@@ -74,7 +74,7 @@ if (isset($_SESSION['welcome_message'])) {
     }
 
     ?>
-    </div>
+    
 </main>
 
 <!-- <div class="today">
