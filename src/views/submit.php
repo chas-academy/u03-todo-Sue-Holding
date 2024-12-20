@@ -27,29 +27,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $welcome_message = validate_name($name);
 
     try {
-        // Insert the user into the database
-        $stmt = $conn->prepare("INSERT INTO user_data (username) VALUES (:username)");
+        // Check if the username already exists
+        $stmt = $conn->prepare("SELECT UserID FROM user_data WHERE username = :username");
         $stmt->execute(['username' => $name]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Fetch the userId of the newly inserted user
-        $UserId = $conn->lastInsertId();
+        if ($user) {
+            // Username exists, retrieve the existing UserID
+            $UserId = $user['UserID'];
+            $welcome_message = "Welcome back, " . $name . "!";
+        } else {
+            // Username does not exist, insert a new user
+            $stmt = $conn->prepare("INSERT INTO user_data (username) VALUES (:username)");
+            $stmt->execute(['username' => $name]);
+            $UserId = $conn->lastInsertId(); // Get the ID of the newly inserted user
+            $welcome_message = "Welcome to the site, " . $name . "!";
+        }
     
     // Store the welcome message in the session
     $_SESSION['user_logged_in'] = true; 
     $_SESSION['welcome_message'] = $welcome_message;
     $_SESSION['UserId'] = $UserId;
-
+    
     // Redirect back to index.php
     header("Location: index.php");
     exit(); // Ensure no further code is executed
+
 }   catch (PDOException $e) {
-    // Handle duplicate username or database errors
-    if ($e->getCode() == 23000) {
-        die("Error: Username already exists. Please choose a different name.");
-    } else {
+         // Handle database errors
         die("Database error: " . $e->getMessage());
     }
-}
 }
 
  // to add user to database   

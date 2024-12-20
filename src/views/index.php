@@ -51,8 +51,9 @@ if (isset($_SESSION['welcome_message'])) {
 
 <aside class="menu-list">
     <h2>What do you want<br> to do today?</h2><br>
-    <h2><a href="?view_database=true">View database</a></h2> <br>
-    <h2><a href="#">Dobby's Today List</a></h2> <br>
+    <!-- <h2><a href="?view_database=true">View database</a></h2> <br> -->
+    <h2><a href="?view_tasksToAdd">View tasks to add</a></h2> <br>
+    <h2><a href="?view_editTasks">Dobby's Today List</a></h2> <br>
     <h2><a href="#">View Completed</a></h2> <br>
     <h2><a href="#">Sorting Hat</a></h2> <br>
     <h2><a href="?view_xmas=true">Christmas Themed</a></h2> <br>
@@ -63,15 +64,66 @@ if (isset($_SESSION['welcome_message'])) {
     
         <!-- the crud funtions based from the menu selection will show here -->
         <?php
+
+    // Ensure the user is logged in before showing tasks
+    if (isset($_SESSION['UserId'])) {
+        $UserID = $_SESSION['UserId'];
+
     // Call function to view all tasks when 'view database' is pressed
     if (isset($_GET['view_database'])) {
+        // echo displayTasks($conn);
         echo displayTasks($conn);
+    }
+
+     // call function to dispay tasks to add
+     if (isset($_GET['view_editTasks'])) {
+        echo displayEditTasks($conn, $UserID);
+    }
+
+    // call function to dispay tasks to add
+    if (isset($_GET['view_tasksToAdd'])) {
+    echo displayTasksToAdd($conn);
     }
 
     // call function to dispay xmas task
     if (isset($_GET['view_xmas'])) {
         echo displayXmas($conn);
+    } 
+    // else {
+    //     echo "<p>Error: You must be logged in to view this page.</p>";
+    // }
+
+    // Handle POST requests for assigning tasks
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assignTask'])) {
+        if (isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $taskId = htmlspecialchars($_POST['taskId']);
+            $userId = $_SESSION['UserId']; // Get the logged-in user's ID from the session
+    
+            // Call the function to assign the task
+            $message = assignTaskToUser($conn, $taskId, $userId);
+            echo "<p>$message</p>"; // Display success or error message
+        } else {
+            echo "<p>Error: User not logged in or invalid task ID.</p>";
+        }
     }
+
+    // Handle POST requests for marking tasks as completed
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['completeTask'])) {
+        if (isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $taskId = htmlspecialchars($_POST['taskId']);
+            $userId = $_SESSION['UserId']; // Get the logged-in user's ID from the session
+
+            // Call the function to mark the task as complete
+            $message = markTaskAsComplete($conn, $taskId, $userId);
+            echo "<p>$message</p>"; // Display success or error message
+        } else {
+            echo "<p>Error: User not logged in or invalid task ID.</p>";
+        }
+    }
+
+} else {
+    echo "<p>Error: You must be logged in to view this page.</p>";
+}
 
     ?>
     
@@ -120,7 +172,7 @@ if (isset($_SESSION['welcome_message'])) {
 ?> -->
 
 
-    <form method="GET" action="submit.php">
+    <!-- <form method="GET" action="submit.php">
         <label for="column">Sort by:</label>
         <select id="Column" name="column">
             <option value="Category">Category</option>
@@ -130,19 +182,19 @@ if (isset($_SESSION['welcome_message'])) {
             <option value="Own">Own</option>
         </select>
         <input type="submit">
-        </form>
+        </form> -->
 
 
         <!-- this function views full database -->
 <?php
-$stmt;
-$conn;
-$rows;
+// $stmt;
+// $conn;
+// $rows;
 
 // Check if a column is selected for sorting
-$sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
-$stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// $sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
+// $stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
+// $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 
 // CRUD READ - View
@@ -178,7 +230,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </section> -->
 
 <aside class="sorting-hat">
-    <h2>Sorting Hat</h2>
+    <!-- <h2>Sorting Hat</h2>
     <p>Add new tasks by House</p>
     <form method="GET" action="submit.php">
         <label for="house">Select House:</label>
@@ -190,11 +242,11 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <option value="all">All</option>
         </select>
         <input type="submit">
-        </form>
+        </form> -->
 </aside>
 
 <section class="create-your-own">
-    <h2>Create your own daily Dobby chores</h2>
+    <!-- <h2>Create your own daily Dobby chores</h2>
     
     <form method="GET" action="submit.php">
         <label for="Category">Select Category:</label>
@@ -224,22 +276,22 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <input type="text" id="task" name="task">
     <br>
         <input type="submit">
-    </form>
+    </form> -->
 
 </section>
 
 <section class="christmas">
-    <h2>Search and add our Christmas themed tasks to your <br>personalised to do list!!</h2>
+    <!-- <h2>Search and add our Christmas themed tasks to your <br>personalised to do list!!</h2> -->
 </section>
 <footer>
-<audio class="song"
+<!-- <audio class="song"
     controls
     width="200"
     height="100"
     autoplay
     loop
     preload="off">
-  <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" />
+  <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" /> -->
 </footer>
 
 </div> 

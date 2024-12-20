@@ -83,85 +83,117 @@ return $output; // Return the output string
 }
 // End of VIEW XMAS function
 
+// view function to add tasks to UserId
+
+function displayTasksToAdd($conn) {
+
+  $sortColumn = isset($_GET['column']) ? htmlspecialchars($_GET['column']) : 'UserID'; // Default sorting column
+  $stmt = $conn->query("SELECT * FROM Tasks WHERE UserID = 0") ; // 
+  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+ // Output variable with a header
+ $output = '<h2>Tasks To Add</h2><br>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>House</th>
+                  <th>Task Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+ 
+ <tb>'; // Start a table
+
+// Loop to display all the tasks in the database in table format
+foreach ($rows as $row) {
+  $output .= '<tr>
+                  <td>' . htmlspecialchars($row['Category']) . '</td>
+                  <td>' . htmlspecialchars($row['House']) . '</td> 
+                  <td>' . htmlspecialchars($row['TaskType']) . '</td> 
+                  <td>' . htmlspecialchars($row['Description']) . '</td>  
+                  <td>
+                    <form method="POST" action="">
+                        <input type="hidden" name="taskId" value="' . htmlspecialchars($row['TaskID']) . '">
+                        <button type="submit" name="assignTask">Add Task</button>
+                    </form>
+                  </td>
+               </tr>';   
+  }
+
+$output .= '</tbody><table>'; 
+return $output; // Return the output string
+
+}
+
+// function to add tasks to a userid
+function assignTaskToUser($conn, $taskId, $userId) {
+  try {
+      $stmt = $conn->prepare("UPDATE Tasks SET UserID = :userId WHERE TaskID = :taskId");
+      $stmt->execute(['userId' => $userId, 'taskId' => $taskId]);
+      return "Task successfully assigned to your account!";
+  } catch (PDOException $e) {
+      return "Error assigning task: " . $e->getMessage();
+  }
+}
 
 
+// View and amend saved tasks to user
+function displayEditTasks($conn, $UserID) {  
+  try {
+     // Prepare the query to fetch tasks assigned to the specific user
+     $stmt = $conn->prepare("SELECT * FROM Tasks WHERE UserID = :userId");
+     $stmt->execute(['userId' => $UserID]);
+     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+ // Output variable with a header
+ $output = '<h2>Mark as completed</h2><br>
+            <table>
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>House</th>
+                  <th>Task Type</th>
+                  <th>Description</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>'; // Start a table
 
+// Loop to display all the tasks in the database in table format
+foreach ($rows as $row) {
+  $output .= '<tr>
+                  <td>' . htmlspecialchars($row['Category']) . '</td>
+                  <td>' . htmlspecialchars($row['House']) . '</td> 
+                  <td>' . htmlspecialchars($row['TaskType']) . '</td> 
+                  <td>' . htmlspecialchars($row['Description']) . '</td>  
+                  <td>
+                    <form method="POST" action="">
+                        <input type="hidden" name="taskId" value="' . htmlspecialchars($row['TaskID']) . '">
+                        <button type="submit" name="completeTask">Mark task as complete</button>
+                    </form>
+                  </td>
+               </tr>';   
+  }
 
+  $output .= '</tbody><table>'; 
+  return $output; // Return the output string
+  } catch (PDOException $e) {
+  return "<p>Error retrieving tasks: " . $e->getMessage() . "</p>";
+  }
+}
 
+function markTaskAsComplete($conn, $taskId, $userId) {
+  try {
+      // Update the task's status to "completed"
+      $stmt = $conn->prepare("UPDATE Tasks SET Completed = 1 WHERE TaskID = :taskId AND UserID = :userId");
+      $stmt->execute(['taskId' => $taskId, 'userId' => $userId]);
 
-
-
-
-
-
-
-
-
-// function getTasks($conn) {
-//   $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
-//     $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
-    
-//     $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-//     $stmt->execute();
-//     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-// }
-
-
-// function getLists($conn) {
-//     $stmt = $conn->query('SELECT id, title FROM lists');
-//     return $stmt->fetchAll();
-// }
-
-
-
-
-
-//  CREATE
-// to add a new customers
-// $stmt = $conn->prepare("INSERT INTO customers (first_name, last_name) VALUES (:first_name, :last_name)");
-// $stmt->bindParam(':first_name', $firstName);
-// $stmt->bindParam(':last_name', $lastName);
-
-// $firstName = "Anna";
-// $lastName = "Svensson";
-// $stmt->execute();
-
-// echo "Ny kund har lagts till!";
-
-
-// READ
-// to view all in the list
-// $sql = "SELECT * FROM customers";
-// $stmt = $conn->query("SELECT * FROM customers");
-// $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// foreach ($rows as $row) {
-//     echo $row['first_name'] . " " . $row['last_name'] . "<br>";
-// }
-
-
-// UPDATE
-// // to update the list
-// $stmt = $conn->prepare("UPDATE customers SET first_name = :first_name WHERE id = :id");
-// $stmt->bindParam(':first_name', $firstName);
-// $stmt->bindParam(':id', $id);
-
-// $firstName = "Susanna";
-// $id = 1;  // updates no 1 in the list
-// $stmt->execute();
-
-// echo "Kundens namn har uppdaterats!";
-
-// DELETE
-// to delete an entry in the list
-// $stmt = $conn->prepare("DELETE FROM customers WHERE id = :id");
-// $stmt->bindParam(':id', $id);
-
-// $id = 1;
-// $stmt->execute();
-
-// echo "Kunden har tagits bort!";
+      return "Task marked as completed successfully!";
+  } catch (PDOException $e) {
+      return "Error marking task as completed: " . $e->getMessage();
+  }
+}
 
 
 ?>
