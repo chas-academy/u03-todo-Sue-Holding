@@ -20,6 +20,13 @@ It will be Harry potter themed and include some Christmas themed tasks.
 
 ## Execution - 
 From week 48 - week 52 as outlined in assignment
+1. Design and style index page
+2. Create and connect database
+3. Implement CRUD functions -
+    - Create
+    - Read
+    - Update
+    - Delete
 
 ## Production ready - 
 Week 1 - 2. Application to be in a working function, with maybe some fine tuning to do.
