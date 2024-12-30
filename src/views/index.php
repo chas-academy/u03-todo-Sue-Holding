@@ -45,6 +45,40 @@ if (isset($_SESSION['welcome_message'])) {
     echo "<h3>" . $_SESSION['welcome_message'] . "</h3>";
     // unset($_SESSION['welcome_message']); // Clear the message after displaying
 }
+if (!isset($_SESSION['UserId'])) {
+    echo "<p>Error: You must be logged in to view this content.</p>";
+    exit;
+}
+
+// Handle POST requests for forms
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // POST request for assigning tasks to user
+    if (isset($_POST['assignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+        $TaskID = htmlspecialchars($_POST['taskId']);
+        $UserID = $_SESSION['UserId']; // Get the logged-in user's ID from the session
+        $message = assignTaskToUser($conn, $TaskID, $UserID); // Call the function to assign the task
+        echo "<p>$message</p>"; // Display success or error message
+    } 
+    // POST request for marking tasks as completed
+    elseif (isset($_POST['completeTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+        $TaskID = htmlspecialchars($_POST['taskId']);
+        $UserID = $_SESSION['UserId'];
+        $message = markTaskAsComplete($conn, $TaskID, $UserID);
+        echo "<p>$message</p>";
+    } 
+    // POST request for deleting a task
+    elseif (isset($_POST['deleteTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+        $TaskID = htmlspecialchars($_POST['taskId']);
+        $UserID = $_SESSION['UserId'];
+        $message = deleteTask($conn, $TaskID, $UserID); // Call the function to delete the task
+        echo "<p>$message</p>";
+    } 
+    // Handle errors for missing session or invalid actions
+    else {
+        echo "<p>Error: You must be logged in to perform this action.</p>";
+    }
+}
+
 ?>         
 </nav>
 
@@ -54,122 +88,49 @@ if (isset($_SESSION['welcome_message'])) {
     <!-- <h2><a href="?view_database=true">View database</a></h2> <br> -->
     <h2><a href="?view_tasksToAdd">View tasks to add</a></h2> <br>
     <h2><a href="?view_editTasks">Dobby's Today List</a></h2> <br>
-    <h2><a href="#">View Completed</a></h2> <br>
+    <h2><a href="?view_completedTasks">View Completed</a></h2> <br>
     <h2><a href="#">Sorting Hat</a></h2> <br>
     <h2><a href="?view_xmas=true">Christmas Themed</a></h2> <br>
     <h2><a href="#">Create Own Tasks</a></h2> <br> 
 </aside>
 
 <main class="main-display">
-    
-        <!-- the crud funtions based from the menu selection will show here -->
-        <?php
-
+    <!-- the crud funtions based on menu selection -->
+<?php
     // Ensure the user is logged in before showing tasks
     if (isset($_SESSION['UserId'])) {
         $UserID = $_SESSION['UserId'];
 
-    // Call function to view all tasks when 'view database' is pressed
     if (isset($_GET['view_database'])) {
-        // echo displayTasks($conn);
-        echo displayTasks($conn);
-    }
-
-     // call function to dispay tasks to add
-     if (isset($_GET['view_editTasks'])) {
-        echo displayEditTasks($conn, $UserID);
-    }
-
-    // call function to dispay tasks to add
-    if (isset($_GET['view_tasksToAdd'])) {
-    echo displayTasksToAdd($conn);
-    }
-
-    // call function to dispay xmas task
-    if (isset($_GET['view_xmas'])) {
-        echo displayXmas($conn);
+        echo displayTasks($conn);   // Call function to view all tasks 
+    } elseif (isset($_GET['view_tasksToAdd'])) { 
+        echo displayTasksToAdd($conn, $UserID); // call function to dispay tasks to add
+    } elseif (isset($_GET['view_editTasks'])) {
+        echo displayEditTasks($conn, $UserID); // call function to dispay tasks to add
+    } elseif (isset($_GET['view_completedTasks'])) {
+        echo displayCompletedTasks($conn, $UserID); // call function to dispay completed tasks
+    } elseif (isset($_GET['view_xmas'])) {
+        echo displayXmas($conn); // call function to dispay xmas task
     } 
-    // else {
-    //     echo "<p>Error: You must be logged in to view this page.</p>";
-    // }
-
-    // Handle POST requests for assigning tasks
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assignTask'])) {
-        if (isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-            $taskId = htmlspecialchars($_POST['taskId']);
-            $userId = $_SESSION['UserId']; // Get the logged-in user's ID from the session
-    
-            // Call the function to assign the task
-            $message = assignTaskToUser($conn, $taskId, $userId);
-            echo "<p>$message</p>"; // Display success or error message
-        } else {
-            echo "<p>Error: User not logged in or invalid task ID.</p>";
-        }
-    }
-
-    // Handle POST requests for marking tasks as completed
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['completeTask'])) {
-        if (isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-            $taskId = htmlspecialchars($_POST['taskId']);
-            $userId = $_SESSION['UserId']; // Get the logged-in user's ID from the session
-
-            // Call the function to mark the task as complete
-            $message = markTaskAsComplete($conn, $taskId, $userId);
-            echo "<p>$message</p>"; // Display success or error message
-        } else {
-            echo "<p>Error: User not logged in or invalid task ID.</p>";
-        }
-    }
-
-} else {
-    echo "<p>Error: You must be logged in to view this page.</p>";
 }
-
-    ?>
+  ?>
     
 </main>
 
-<!-- <div class="today">
-    <h2>Dobby today list</h2>       
-    
-    // $tasks = getTasks($conn);
 
-// foreach ($tasks as $task); 
-
-<section class="today-list"> -->
-    <!-- <h2 class="task-title">Dobby the Elf's Chores ?></h2> -->
-    <!-- <h2 class="task-title">
-     
-    
-
-
-  <?php echo htmlspecialchars($task['title']); ?> -->
+  
 <br>
 <div class="extra">
 
-    <!-- <div class="task-info">
-        <p><?php echo htmlspecialchars($TaskType['id']); ?></p>
-        <input type="checkout"> <?php if ($task['is_completed']) echo 'checked'; ?>
-        <p class="task-description"><?php echo htmlspecialchars($task['description']); ?></p>
-    </div> -->
-    <br>
-    <div class="edit-containter">
+    <div class="task-info">
+    
+    </div> 
+    
+    <!-- <div class="edit-containter">
         <button>edit</button>
         <button>delete</button>
-        <a href="./views/edit.php">edit</a> 
+        <a href="./views/edit.php">edit</a>  -->
     </section>
-
-
-
-        <!-- not sure about this code -->
-    <!-- // Define allowed columns for sorting
-    // $allowedColumns = ['Category', 'Daily', 'House', 'Christmas', 'Own'];
-    // $sortColumn = isset($_GET['column']) && in_array($_GET['column'], $allowedColumns) ? $_GET['column'] : 'Daily'; // Default sorting column
-    
-    // $stmt = $conn->prepare("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-    // $stmt->execute();
-    // $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?> -->
 
 
     <!-- <form method="GET" action="submit.php">
@@ -187,19 +148,7 @@ if (isset($_SESSION['welcome_message'])) {
 
         <!-- this function views full database -->
 <?php
-// $stmt;
-// $conn;
-// $rows;
 
-// Check if a column is selected for sorting
-// $sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
-// $stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-// $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-// CRUD READ - View
-// call function to view all tasks
-// displayTasks($rows);
 ?>
 
 <!-- <input type="radio" id="task1" name="harry_potter_task" value="task1">
@@ -217,17 +166,7 @@ if (isset($_SESSION['welcome_message'])) {
 
     </section>
 
-<!-- <section class="done-list">
-    <h2>View Completed</h2>
-    <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-    </ul>
 
-    </section> -->
 
 <aside class="sorting-hat">
     <!-- <h2>Sorting Hat</h2>
