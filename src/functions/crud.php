@@ -108,7 +108,7 @@ function assignTaskToUser($conn, $TaskID, $UserID) {
         SELECT :userId, :taskId
         WHERE NOT EXISTS (
         SELECT 1 FROM user_tasks 
-        WHERE UserID = :userId AND Task ÍD = :taskId
+        WHERE UserID = :userId AND TaskID = :taskId
         )
     ");
     $stmt->bindParam(':userId', $UserID, PDO::PARAM_INT);
@@ -123,6 +123,7 @@ function assignTaskToUser($conn, $TaskID, $UserID) {
 
 
 // Fetch tasks assigned to the user that are not completed
+// Dobby's today list
 function displayEditTasks($conn, $UserID) {  
   try {
      // Prepare the query to fetch tasks assigned to the specific user
@@ -131,9 +132,14 @@ function displayEditTasks($conn, $UserID) {
           ("SELECT t.* 
           FROM Tasks t
           JOIN user_tasks ut ON t.TaskID = ut .TaskID
-          WHERE ut.UserID = :userId AND t.Status !='completed'");
+          WHERE ut.UserID = :userId AND t.Status !='completed'"
+          );
      $stmt->execute(['userId' => $UserID]);
      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+     if (empty($rows)) {
+        return "<p>No tasks available to edit.</p>";
+     }
 
     // Define table headers
     $headers = ['Category', 'House', 'Task Type', 'Description', 'Action'];
@@ -144,7 +150,7 @@ function displayEditTasks($conn, $UserID) {
           'label' => 'Mark as Completed',
           'name' => 'completeTask',
           'condition' => function ($row) {
-              return $row['Status'] !== 'completed'; // Show only if not completed
+              return true;
               },
         ],
         [
@@ -157,7 +163,7 @@ function displayEditTasks($conn, $UserID) {
     ];
 
     // Use the renderTasksTable function to generate the table
-    return renderTasksTable($rows, $headers);
+    return renderTasksTable($rows, $headers, $actionButtons);
     } catch (PDOException $e) {
     return "<p>Error retrieving tasks: " . $e->getMessage() . "</p>";
     }
@@ -166,7 +172,11 @@ function displayEditTasks($conn, $UserID) {
 function markTaskAsComplete($conn, $TaskID, $UserID) {
   try {
       // Update the task's status to "completed"
-      $stmt = $conn->prepare("UPDATE Tasks SET Status = 1 WHERE TaskID = :taskId AND UserID = :userId");
+      $stmt = $conn->prepare
+        ("UPDATE Tasks t
+        INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
+        SET t.Status = 'completed'
+        WHERE ut.TaskID = :taskId AND ut.UserID = :userId");
       $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
 
       return "Task marked as completed successfully!";
@@ -179,7 +189,9 @@ function markTaskAsComplete($conn, $TaskID, $UserID) {
 function displayCompletedTasks($conn, $UserID) {
   try {
     // Prepare the query to fetch tasks assigned to the specific user
-    $stmt = $conn->prepare("SELECT * FROM Tasks 
+    $stmt = $conn->prepare
+        ("SELECT * FROM Tasks t
+        INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
         WHERE UserID = :userId AND Status = 'completed'");
     // -- AND Status = :completed
     $stmt->execute(['userId' => $UserID]);
@@ -199,7 +211,10 @@ function displayCompletedTasks($conn, $UserID) {
  function deleteTask($conn, $TaskID, $UserID) {
   try {
       // Delete the task assigned to the user
-      $stmt = $conn->prepare("DELETE FROM Tasks WHERE TaskID = :taskId AND UserID = :userId");
+      $stmt = $conn->prepare
+        ("DELETE FROM user_tasks
+        WHERE TaskID = :taskId AND UserID = :userId"
+        );
       $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
 
       return "Task deleted successfully!";
@@ -207,6 +222,41 @@ function displayCompletedTasks($conn, $UserID) {
       return "Error deleting task: " . $e->getMessage();
   }
 }
+
+// create own tasks function unique to UserID
+function createTask($conn, $UserID, $Category, $House, $TaskType, $Description, $Daily, $Christmas) {
+try {
+  //insert new task into Tasks table
+  $stmt = $conn->prepare
+    ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, Status)
+    VALUE (:category, :house, :taskType, :description, 'no', 'no', 'pending')"
+    );
+  $stmt->execute([
+    'category' => $Category,
+    'house' => $House,
+    'taskType' => $TaskType,
+    'description' => $Description,
+    'daily' => $Daily,
+    'christmas' => $Christmas,
+  ]);
+
+  // get the new TaskID
+  $stmt = $conn->prepare(
+    "INSERT INTO user_tasks (UserID, TaskID)
+    VALUES (:userId, :taskId)"
+  );
+  $stmt->execute([
+    'userId' => $UserID,
+    'taskId' => $TaskID,
+  ]);
+
+  return "Task created and assigned to the user successfully!";
+} catch (PDOException $e) {
+    return "Error creating task: " . $e->getMessage();
+}
+}
+
+
 
  // Start of VIEW XMAS Themed tasks function
 function displayXmas($conn) {
