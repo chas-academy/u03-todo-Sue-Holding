@@ -5,50 +5,70 @@ require_once '../views/db.php';
 
 // Function to render tasks table
 function renderTasksTable($rows, $headers, $actionButtons = []) {
-  $output = '<table>';
+  $html = '<table border="1" style="width:100%; border-collapse: collapse;">';
   
   // Add table headers
-  $output .= '<thead><tr>';
+  $html .= '<thead><tr>';
   foreach ($headers as $header) {
-      $output .= '<th>' . htmlspecialchars($header) . '</th>';
+      $html .= '<th>' . htmlspecialchars($header) . '</th>';
   }
   if (!empty($actionButtons)) {
-    $output .= '<th>Actions</th>'; // Add a header for the action column if there are action buttons
+    $html .= '<th>Actions</th>'; // Add the 'Actions' header
   }
-  $output .= '</tr></thead>';
-  $output .= '<tbody>';
+  $html .= '</tr></thead>';
 
   // Add table body with rows
+  $html .= '<tbody>';
   foreach ($rows as $row) {
-      $output .= '<tr>';
-      foreach ($row as $key => $value) {
-        if ($key != 'TaskID' && $key != 'Daily' && $key != 'Christmas' && $key != 'created_at') {  // Prevent TaskID from being displayed directly
-            $value = $value ?? '';  // Use empty string if value is null
-            $output .= '<td>' . htmlspecialchars($value) . '</td>';
-          }
-      }
+      // if (empty($row['Status'])) {
+        // $row['Status'] = 'N/A'; // Default display for missing statuses
+      $html .= '<tr>';
 
-   // Add action buttons
+  // render cells in the table body $headers
+      // foreach ($row as $key => $value) {   save for later  
+      //   // skip columns from being displayed directly
+      //   if (!in_array($key, ['TaskID', 'Daily', 'Christmas', 'created_at'])) {
+      //       $value = $value ?? 'N/A';  // default to NA if value is null
+  foreach ($headers as $header) {
+      $key = match (strtolower($header)) { // header to match column data
+          'category' => 'Category',
+          'house' => 'House',
+          'task type' => 'TaskType',
+          'description' => 'Description',
+          'status' => 'Status',
+          default => null,
+      };
+
+      $value = $key && isset($row[$key]) ? $row[$key] : 'N/A';
+
+      if ($key === 'status' && empty ($row['status'])) {
+          $value = 'Not Completed';
+        }
+            $html .= '<td>' . htmlspecialchars($value) . '</td>';
+      }
+      
+
+   // Add action buttons to Action column
    if (!empty($actionButtons)) {
-          $output .= '<td>';
+          $html .= '<td style="text-align: center;">';
                 foreach ($actionButtons as $button) {
                 // Check if the condition to display this button is met
                 if (!isset($button['condition']) || $button['condition']($row)) {
-                    $output .= 
-                      '<form method="POST" action="index.php" style="display:inline-block;">
+                    $html .= 
+                      '<form method="POST" action="index.php" style="display:inline-block; margin-right: 5px;">
                         <input type="hidden" name="taskId" value="' . htmlspecialchars($row['TaskID']) . '">
                         <button type="submit" name="' . htmlspecialchars($button['name']) . '">' . htmlspecialchars($button['label']) . '</button>
                       </form>';
                 }
             }
-            $output .= '</td>';
+            $html .= '</td>';
           }
   
-          $output .= '</tr>';
+          $html .= '</tr>';
       }
-      $output .= '</tbody></table>';
+      $html .= '</tbody></table>';
   
-      return $output;
+      return $html;
   }
 
 // view function to add tasks to UserId
@@ -63,11 +83,12 @@ function displayTasksToAdd($conn, $UserID) {
     // Retrieve tasks not assigned to the current user
     // $stmt = $conn->prepare("SELECT * FROM Tasks WHERE UserID != UserID");
     // $stmt->execute();
-    $stmt = $conn->prepare("SELECT t.* FROM Tasks t
+    $stmt = $conn->prepare("SELECT t.* 
+            FROM Tasks t
             WHERE t.TaskID NOT IN (
-              SELECT TaskID 
-              FROM user_tasks 
-              WHERE UserID = :UserID
+                SELECT ut.TaskID
+                FROM user_tasks ut
+                WHERE ut.UserID = :UserID
             )
         ");
 
@@ -136,13 +157,14 @@ function displayEditTasks($conn, $UserID) {
           );
      $stmt->execute(['userId' => $UserID]);
      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    //  print_r($rows); //debug
 
      if (empty($rows)) {
         return "<p>No tasks available to edit.</p>";
      }
 
     // Define table headers
-    $headers = ['Category', 'House', 'Task Type', 'Description', 'Action'];
+    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
 
     // Define action buttons
     $actionButtons = [
@@ -198,7 +220,7 @@ function displayCompletedTasks($conn, $UserID) {
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
    // Define table headers
-   $headers = ['Category', 'House', 'Task Type', 'Description', 'Action'];
+   $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
 
    // Use the renderTasksTable function to generate the table
    return renderTasksTable($rows, $headers);
@@ -229,7 +251,7 @@ try {
   //insert new task into Tasks table
   $stmt = $conn->prepare
     ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, Status)
-    VALUE (:category, :house, :taskType, :description, 'no', 'no', 'pending')"
+    VALUE (:category, :house, :taskType, :description, :daily, :christmas, 'Not Completed')"
     );
   $stmt->execute([
     'category' => $Category,
