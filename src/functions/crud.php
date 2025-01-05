@@ -86,24 +86,17 @@ if ($key === 'UserTaskStatus' && (empty($value) || $value === 'N/A')) {
 // view function to add tasks to UserId
 function displayTasksToAdd($conn, $UserID) {
   try {
-    // Get the logged-in user's ID
-    // $UserID = $_SESSION['UserID'];
-    // Retrieve tasks where UserID is 0 (unassigned tasks)
-    // $stmt = $conn->prepare("UPDATE user_tasks SET UserID = :userId WHERE TaskID = :taskId");
-    // $stmt->execute(['userId' => $UserID, 'taskId' => $TaskID]);
-
-    // Retrieve tasks not assigned to the current user
-    // $stmt = $conn->prepare("SELECT * FROM Tasks WHERE UserID != UserID");
-    // $stmt->execute();
-    $stmt = $conn->prepare("SELECT t.* 
-            FROM Tasks t
-            WHERE t.TaskID NOT IN (
-                SELECT ut.TaskID
-                FROM user_tasks ut
-                WHERE ut.UserID = :UserID
-            )
-        ");
-
+      $stmt = $conn->prepare("
+      SELECT t.*
+      FROM Tasks t
+      WHERE t.CreatedBy IN (0, :UserID)
+      AND t.TaskID NOT IN (
+        SELECT ut.TaskID
+        FROM user_tasks ut
+        WHERE ut.UserID = :UserID
+        ) 
+      ");
+   
     $stmt->execute(['UserID' => $UserID]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -283,12 +276,12 @@ function displayCompletedTasks($conn, $UserID) {
 }
 
 // create own tasks function unique to UserID
-function createTask($conn, $UserID, $Category, $House, $TaskType, $Description, $Daily, $Christmas) {
+function displayCreateTask($conn, $UserID, $Category, $House, $TaskType, $Description, $Daily, $Christmas) {
 try {
   //insert new task into Tasks table
   $stmt = $conn->prepare
-    ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, Status)
-    VALUE (:category, :house, :taskType, :description, :daily, :christmas, 'Not Completed')"
+    ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, Status, CreatedBy)
+    VALUE (:category, :house, :taskType, :description, :daily, :christmas, 'Not Completed', :createdBy)"
     );
   $stmt->execute([
     'category' => $Category,
@@ -297,12 +290,15 @@ try {
     'description' => $Description,
     'daily' => $Daily,
     'christmas' => $Christmas,
+    'createdBy' => $UserID
   ]);
 
   // get the new TaskID
+  $TaskID = $conn->lastInsertId(); 
+  // insert new taskId into user_tasks table
   $stmt = $conn->prepare(
-    "INSERT INTO user_tasks (UserID, TaskID)
-    VALUES (:userId, :taskId)"
+    "INSERT INTO user_tasks (UserID, TaskID, Status)
+    VALUES (:userId, :taskId, 'Not Completed')"
   );
   $stmt->execute([
     'userId' => $UserID,
@@ -325,7 +321,7 @@ function displayXmas($conn) {
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
   
     // Define table headers
-    $headers = ['Category', 'House', 'Task Type', 'Description', 'Action'];
+    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
   
     // Use the renderTasksTable function to generate the table
     return renderTasksTable($rows, $headers);

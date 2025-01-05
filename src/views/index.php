@@ -91,10 +91,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<p>Error reassigning task: " . $e->getMessage() . "</p>";
         }
     } 
-    // Handle errors for missing session or invalid actions
-    else {
-        echo "<p>Error: You must be logged in to perform this action.</p>";
+    // post request to create new task
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['createTask'])) {
+        $Category = htmlspecialchars($_POST['category']);
+        $House = htmlspecialchars($_POST['house']);
+        $TaskType = htmlspecialchars($_POST['taskType']);
+        $Description = htmlspecialchars($_POST['description']);
+        $Daily = intval($_POST['daily']);
+        $Christmas = intval($_POST['christmas']);
+        $UserID = $_SESSION['UserId']; // Ensure user ID is available
+    
+        // Insert task into the database
+        try {
+            $stmt = $conn->prepare
+            ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas) 
+            VALUES (:category, :house, :taskType, :description, :daily, :christmas)"
+            );
+
+            $stmt->execute([
+                'category' => $Category,
+                'house' => $House,
+                'taskType' => $TaskType,
+                'description' => $Description,
+                'daily' => $Daily,
+                'christmas' => $Christmas
+            ]);
+
+            // Get the last inserted TaskID
+        $TaskID = $conn->lastInsertId();
+
+        // Associate the task with the logged-in user in user_tasks
+        $stmt = $conn->prepare(
+            "INSERT INTO user_tasks (UserID, TaskID, Status) 
+             VALUES (:userID, :taskID, 'Not Completed')"
+        );
+        $stmt->execute([
+            'userID' => $UserID,
+            'taskID' => $TaskID
+        ]);
+
+            echo "<p>Task created successfully!</p>";
+        } catch (PDOException $e) {
+            echo "<p>Error creating task: " . $e->getMessage() . "</p>";
+        }
     }
+    
+
+    // Handle errors for missing session or invalid actions
+    // else {
+    //     echo "<p>Error: You must be logged in to perform this action.</p>";
+    // }
 }
 
 ?>         
@@ -107,12 +153,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h2><a href="?view_tasksToAdd">View tasks to add</a></h2> <br>
     <h2><a href="?view_editTasks">Dobby's Today List</a></h2> <br>
     <h2><a href="?view_completedTasks">View Completed</a></h2> <br>
-    <h2><a href="#">Sorting Hat</a></h2> <br>
+    <h2><a href="?view_createTask">Create Own Tasks</a></h2> <br> 
     <h2><a href="?view_xmas=true">Christmas Themed</a></h2> <br>
-    <h2><a href="#">Create Own Tasks</a></h2> <br> 
+    <!-- <h2><a href="#">Sorting Hat</a></h2> <br> -->
+    
 </aside>
 
 <main class="main-display">
+
     <!-- the crud funtions based on menu selection -->
 <?php
     // Ensure the user is logged in before showing tasks
@@ -122,21 +170,122 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_GET['view_database'])) {
         echo displayTasks($conn);   // Call function to view all tasks 
     } elseif (isset($_GET['view_tasksToAdd'])) { 
-        echo displayTasksToAdd($conn, $UserID); // call function to dispay tasks to add
+        echo displayTasksToAdd($conn, $UserID); // call function to display tasks to add
     } elseif (isset($_GET['view_editTasks'])) {
-        echo displayEditTasks($conn, $UserID); // call function to dispay tasks to add
+        echo displayEditTasks($conn, $UserID); // call function to display tasks to add
     } elseif (isset($_GET['view_completedTasks'])) {
-        echo displayCompletedTasks($conn, $UserID); // call function to dispay completed tasks
+        echo displayCompletedTasks($conn, $UserID); // call function to display completed tasks
     } elseif (isset($_GET['view_xmas'])) {
-        echo displayXmas($conn); // call function to dispay xmas task
-    } 
-}
-  ?>
+        echo displayXmas($conn); // call function to display xmas task
+    } if (isset($_GET['view_createTask'])) { 
+        // $Category = $_POST['category'];
+        // $House = $_POST['house'];
+        // $TaskType = $_POST['taskType'];
+        // $Description = $_POST['description'];
+        // $Daily = $_POST['daily'];
+        // $Christmas = $_POST['christmas'];
     
+        // Pass these variables to the function
+        // echo displayCreateTask($conn, $UserID, $Category, $House, $TaskType, $Description, $Daily, $Christmas);
+
+        // show form to create new tasks
+        ?>
+        <form method="POST" action="index.php?view_createTask">
+            <fieldset>
+                <legend>Create New Task</legend>
+
+                <label for="category">Select Category:</label>
+                <select id="category" name="category">
+                    <option value="wand practice">Wand Practice</option>
+                    <option value="wizard dual">Wizard Dual</option>
+                    <option value="owl post">Owl Post</option>
+                    <option value="enchanted books">Enchanted Books</option>
+                    <option value="potions master">Potions Master</option>
+                    <option value="magical creatures">Magical Creatures</option>
+                    <option value="marauder's map">Marauder's Map</option>
+                    <option value="quidditch training">Quidditch Training</option>
+                    <option value="own">Own</option>
+                </select>
+                <br><br>
+
+                <label for="house">Select House:</label>      
+                <select id="house" name="house">
+                    <option value="griffindor">Griffindor</option>
+                    <option value="ravenclaw">Ravenclaw</option>
+                    <option value="huffelpuff">Huffelpuff</option>
+                    <option value="slytherin">Slytherin</option>
+                    <option value="own">Own</option>
+                </select> 
+                <br><br> 
+
+                <label for="taskType">Task Type:</label>
+                <select id="taskType" name="taskType">
+                    <option value="learn a new skill">Learn a new skill</option>
+                    <option value="take care of plants and pets">Take care of plants and pets</option>
+                    <option value="challenge yourself">Challenge Yourself</option>
+                    <option value="keep in touch">Keep in touch</option>
+                    <option value="read a book or blog">Read a book or blog</option>
+                    <option value="cooking and baking">Cooking and baking</option>
+                    <option value="planning trips and outings">Planning trips and outings</option>
+                    <option value="stay active">Stay Active</option>
+                    <option value="help someone">Help Someone</option>
+                    <option value="own">Own</option>
+                </select> 
+                <br><br>
+                
+
+                <label for="description">Description:</label>
+                <textarea name="description" required></textarea><br><br>
+
+                <label for="daily">Daily Task:</label>
+                <input type="radio" name="daily" value="1" required> Yes
+                <input type="radio" name="daily" value="0" required> No<br><br>
+
+                <label for="christmas">Christmas Task:</label>
+                <input type="radio" name="christmas" value="1" required> Yes
+                <input type="radio" name="christmas" value="0" required> No<br><br>
+
+                <input type="submit" name="createTask" value="Create Task">
+            </fieldset>
+        </form>
+        <?php
+
+ // Handle form submission for creating task
+ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['createTask'])) {
+    // Gather form data
+    $category = htmlspecialchars($_POST['category']);
+    $house = htmlspecialchars($_POST['house']);
+    $taskType = htmlspecialchars($_POST['taskType']);
+    $description = htmlspecialchars($_POST['description']);
+    $daily = intval($_POST['daily']);
+    $christmas = intval($_POST['christmas']);
+
+    // Insert into database
+    try {
+        $stmt = $conn->prepare
+        ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, CreatedBy) 
+        VALUES (:category, :house, :taskType, :description, :daily, :christmas, :createdBy)");
+        $stmt->execute([
+            'category' => $Category,
+            'house' => $House,
+            'taskType' => $TaskType,
+            'description' => $Description,
+            'daily' => $Daily,
+            'christmas' => $Christmas,
+            'createdBy' => $UserID
+        ]);
+        echo "<p>Task created successfully!</p>";
+        } catch (PDOException $e) {
+        echo "<p>Error creating task: " . $e->getMessage() . "</p>";
+        }
+    }
+    }
+    }
+?>
+   
 </main>
 
 
-  
 <br>
 <div class="extra">
 
