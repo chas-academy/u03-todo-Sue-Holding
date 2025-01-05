@@ -29,27 +29,35 @@ function renderTasksTable($rows, $headers, $actionButtons = []) {
           'house' => 'House',
           'task type' => 'TaskType',
           'description' => 'Description',
-          'status' => 'Status',
+          'status' => 'UserTaskStatus',
           default => null,
       };
 
       $value = $key && isset($row[$key]) ? $row[$key] : 'N/A';
 
 // handling for status column
-      if ($key === 'Status') {
-        if (isset($row['UserStatus'])) {
-          $value = $row['UserStatus']; // takes status from user status on tasks
-        } elseif (empty($value)) {
-          $value = 'Not Completed'; // fallback for empty status
-        }
-      }
+
+// if ($key === 'UserTaskStatus' && empty($value)) {
+//   $value = 'Not Completed';
+// }
+
+
+      // if ($key === 'Status') {
+      //   if (isset($row['UserStatus'])) {
+      //     $value = $row['UserStatus']; // takes status from user status on tasks
+      //   } elseif (empty($value)) {
+      //     $value = 'Not Completed'; // fallback for empty status
+      //   }
+      // }
+
+// Ensure 'Status' defaults to 'Not Completed' if empty or missing
+if ($key === 'UserTaskStatus' && (empty($value) || $value === 'N/A')) {
+  $value = 'Not Completed';
+}
+
       $html .= '<td>' . htmlspecialchars($value) . '</td>';
     }
-      // if ($key === 'status' && empty ($row['status'])) {
-      //     $value = 'Not Completed';
-      //   }
-      //       $html .= '<td>' . htmlspecialchars($value) . '</td>';
-      // }
+  
       
 
    // Add action buttons to Action column
@@ -220,10 +228,15 @@ function displayCompletedTasks($conn, $UserID) {
   try {
     // Prepare the query to fetch tasks assigned to the specific user
     $stmt = $conn->prepare
-        ("SELECT t.*, ut.Status as UserStatus
+        ("SELECT t.*, ut.Status AS UserTaskStatus
         FROM Tasks t
-        JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        WHERE ut.UserID = :userId AND ut.Status = 'Completed'");
+        INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
+        WHERE ut.UserID = :userId AND ut.Status = 'completed'"
+        );
+        // ("SELECT t.*, ut.Status as UserStatus
+        // FROM Tasks t
+        // JOIN user_tasks ut ON t.TaskID = ut.TaskID
+        // WHERE ut.UserID = :userId AND ut.Status = 'Completed'");
     // -- AND Status = :completed
     $stmt->execute(['userId' => $UserID]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -235,8 +248,19 @@ function displayCompletedTasks($conn, $UserID) {
    // Define table headers
    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
 
+     // Define action buttons
+     $actionButtons = [
+      [
+          'label' => 'Reassign Task',
+          'name' => 'reassignTask',
+          'condition' => function ($row) {
+              return true;
+          },
+      ],
+  ];
+
    // Use the renderTasksTable function to generate the table
-   return renderTasksTable($rows, $headers);
+   return renderTasksTable($rows, $headers, $actionButtons);
    } catch (PDOException $e) {
    return "<p>Error retrieving tasks: " . $e->getMessage() . "</p>";
    }

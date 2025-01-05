@@ -73,6 +73,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = deleteTask($conn, $TaskID, $UserID); // Call the function to delete the task
         echo "<p>$message</p>";
     } 
+    // post request for reassigning taskss
+    elseif (isset($_POST['reassignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+        $TaskID = htmlspecialchars($_POST['taskId']);
+        $UserID = $_SESSION['UserId'];
+
+        try {
+            // Update the Status in the user_tasks table to reset it
+            $stmt = $conn->prepare(
+                "UPDATE user_tasks 
+                SET Status = 'not completed' 
+                WHERE TaskID = :taskId AND UserID = :userId"
+            );
+            $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
+            echo "<p>Task reassigned successfully!</p>";
+        } catch (PDOException $e) {
+            echo "<p>Error reassigning task: " . $e->getMessage() . "</p>";
+        }
+    } 
     // Handle errors for missing session or invalid actions
     else {
         echo "<p>Error: You must be logged in to perform this action.</p>";
