@@ -20,15 +20,9 @@ function renderTasksTable($rows, $headers, $actionButtons = []) {
   // Add table body with rows
   $html .= '<tbody>';
   foreach ($rows as $row) {
-      // if (empty($row['Status'])) {
-        // $row['Status'] = 'N/A'; // Default display for missing statuses
       $html .= '<tr>';
 
   // render cells in the table body $headers
-      // foreach ($row as $key => $value) {   save for later  
-      //   // skip columns from being displayed directly
-      //   if (!in_array($key, ['TaskID', 'Daily', 'Christmas', 'created_at'])) {
-      //       $value = $value ?? 'N/A';  // default to NA if value is null
   foreach ($headers as $header) {
       $key = match (strtolower($header)) { // header to match column data
           'category' => 'Category',
@@ -41,11 +35,21 @@ function renderTasksTable($rows, $headers, $actionButtons = []) {
 
       $value = $key && isset($row[$key]) ? $row[$key] : 'N/A';
 
-      if ($key === 'status' && empty ($row['status'])) {
-          $value = 'Not Completed';
+// handling for status column
+      if ($key === 'Status') {
+        if (isset($row['UserStatus'])) {
+          $value = $row['UserStatus']; // takes status from user status on tasks
+        } elseif (empty($value)) {
+          $value = 'Not Completed'; // fallback for empty status
         }
-            $html .= '<td>' . htmlspecialchars($value) . '</td>';
       }
+      $html .= '<td>' . htmlspecialchars($value) . '</td>';
+    }
+      // if ($key === 'status' && empty ($row['status'])) {
+      //     $value = 'Not Completed';
+      //   }
+      //       $html .= '<td>' . htmlspecialchars($value) . '</td>';
+      // }
       
 
    // Add action buttons to Action column
@@ -148,12 +152,12 @@ function assignTaskToUser($conn, $TaskID, $UserID) {
 function displayEditTasks($conn, $UserID) {  
   try {
      // Prepare the query to fetch tasks assigned to the specific user
-     // Filter out tasks that are already completed
+     // Filter out tasks that are already completed in user_tasks
      $stmt = $conn->prepare
-          ("SELECT t.* 
+          ("SELECT t.*, ut.Status AS UserStatus
           FROM Tasks t
-          JOIN user_tasks ut ON t.TaskID = ut .TaskID
-          WHERE ut.UserID = :userId AND t.Status !='completed'"
+          JOIN user_tasks ut ON t.TaskID = ut.TaskID
+          WHERE ut.UserID = :userId AND ut.Status !='completed'"
           );
      $stmt->execute(['userId' => $UserID]);
      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -195,10 +199,14 @@ function markTaskAsComplete($conn, $TaskID, $UserID) {
   try {
       // Update the task's status to "completed"
       $stmt = $conn->prepare
-        ("UPDATE Tasks t
-        INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        SET t.Status = 'completed'
-        WHERE ut.TaskID = :taskId AND ut.UserID = :userId");
+        // ("UPDATE Tasks t
+        // INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
+        // SET t.Status = 'completed'
+        // WHERE ut.TaskID = :taskId AND ut.UserID = :userId");
+        ("UPDATE user_tasks
+        SET STATUS = 'completed'
+        WHERE TaskID = :taskId AND UserID = :userId"
+        );
       $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
 
       return "Task marked as completed successfully!";
@@ -212,12 +220,17 @@ function displayCompletedTasks($conn, $UserID) {
   try {
     // Prepare the query to fetch tasks assigned to the specific user
     $stmt = $conn->prepare
-        ("SELECT * FROM Tasks t
-        INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        WHERE UserID = :userId AND Status = 'completed'");
+        ("SELECT t.*, ut.Status as UserStatus
+        FROM Tasks t
+        JOIN user_tasks ut ON t.TaskID = ut.TaskID
+        WHERE ut.UserID = :userId AND ut.Status = 'Completed'");
     // -- AND Status = :completed
     $stmt->execute(['userId' => $UserID]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($rows)) {
+      return "<p>No completed tasks available.</p>";
+  }
 
    // Define table headers
    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
