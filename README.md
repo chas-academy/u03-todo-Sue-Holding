@@ -35,3 +35,9 @@ Week 1 - 2. Application to be in a working function, with maybe some fine tuning
 Week 2 -
 Look back at the project: What went well? What went bad? How can I do it differently in my next project?
 Feature expansion - any other desired features to implement?
+
+Link to Figma for ER-diagram 
+https://www.figma.com/design/IbF5MVSAe7AfwUPpZbyZ8M/ER-Diagram-To-Do-List?node-id=0-1&p=f&t=9EC8nk7DR4qQpT81-0
+
+Link to Figma for site design 
+https://www.figma.com/design/Ph6qDZ8Bf439eGvyIXNtIB/Harry-Potter-To-Do-App-Design?node-id=0-1&p=f&t=HUR9FOUHrtALDEhQ-0
