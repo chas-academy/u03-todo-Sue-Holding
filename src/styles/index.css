@@ -1,7 +1,7 @@
 * {
     box-sizing: border-box;
   }
-  
+
 h1 {
     color: goldenrod;
     font-size: 2.5em;
@@ -105,7 +105,7 @@ table {
 @media (any-hover: hover) {
     a:hover {
         color: green;
-        
+
     }
 }
 
@@ -121,34 +121,34 @@ table {
     }
 
 
-    .bg  { 
+    .bg  {
         grid-column: 1 / 4;
         grid-row: 1 / 4;
-        width: 100%; 
-        
+        width: 100%;
+
     }
 
-     /* 1st child */ 
-     .header { 
+     /* 1st child */
+     .header {
         grid-column: 1 / 4;
         grid-row: 1 / 2;
-        width: 100%; 
+        width: 100%;
         padding-left: 210px;
         height: 10px;
 
     }
 
      /* 2nd child */
-     .login { 
+     .login {
         grid-column: 1 / 4;
         grid-row: 3 / 4;
-        width: auto; 
+        width: auto;
         height: auto;
         margin-top: 100px;
         padding: 20px;
     }
 
-   
+
     .menu-list {
         grid-column: 1 / 2;
         grid-row: 4 / 6;
@@ -158,7 +158,7 @@ table {
         padding-right: 50px;
         border: solid 2px black;
         width: 375px;
-    
+
     }
 
     .main-display {
@@ -180,14 +180,14 @@ table {
 }
 
     /* 3rd child */
-    /* .today-list { 
+    /* .today-list {
         grid-column: 1 / 3;
         grid-row: 2 / 3;
-        width: 100%; 
-        padding-left: 450px;  
+        width: 100%;
+        padding-left: 450px;
         height: 50px;
         margin-top: -150px;
-        
+
     } */
 
     /* .done-list {
@@ -199,38 +199,38 @@ table {
     } */
 
     /* 4th child */
-    /* .sorting-hat { 
+    /* .sorting-hat {
         grid-column: 2 / 3;
         grid-row: 3 / 4;
-        width: 100%; 
+        width: 100%;
         padding-left: 400px;
         height: 50px;
         margin-top: -540px;
     }
 
-    .create-your-own  { 
+    .create-your-own  {
         grid-column: 1 / 2;
         grid-row: 5 / 6;
-        width: 100%; 
+        width: 100%;
         height: auto;
         margin-top: -400px;
         margin-left: 100px;
         color:rgb(4, 4, 131);
     }
 
-    .christmas  { 
+    .christmas  {
         grid-column: 2 / 3;
         grid-row: 5 / 6;
         width: 100%;
-        height: auto; 
+        height: auto;
         margin-top: -400px;
-        
+
     }
 
     .song {
         grid-column: 1 / 2;
         grid-row: 5 / 6;
         width: auto;
-        height: auto; 
+        height: auto;
     } */
 

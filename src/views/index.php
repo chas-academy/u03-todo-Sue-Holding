@@ -1,7 +1,7 @@
 <?php
 session_start(); // Start the session to store the welcome message
 include 'db.php'; // Include the database connection file
-require '../functions/crud.php'; // to include sql stmt 
+require '../functions/crud.php'; // to include sql stmt
 
 ?>
 
@@ -25,87 +25,79 @@ require '../functions/crud.php'; // to include sql stmt
 
 <!-- log in function -->
 <nav class="login">
-<?php if (!isset($_SESSION['user_logged_in'])): ?>
+<?php if (!isset($_SESSION['user_logged_in'])) : ?>
         <form method="POST" action="submit.php">
             <input type="text" id="name" name="name" placeholder="Enter your username" required>
             <button type="submit">Log In</button>
         </form>
-    <?php else: ?>
+<?php else : ?>
         <form method="POST" action="logout.php">
             <button type="submit">Log Out</button>
         </form>
-    <?php endif; ?>
+<?php endif; ?>
 
     <?php
-if (isset($_SESSION['welcome_message'])) {
-    echo "<h3>" . $_SESSION['welcome_message'] . "</h3>";
-}
-if (!isset($_SESSION['UserId'])) {
-    echo "<p>Error: You must be logged in to view this content.</p>";
-    exit;
-}
+    if (isset($_SESSION['welcome_message'])) {
+        echo "<h3>" . $_SESSION['welcome_message'] . "</h3>";
+    }
+    if (!isset($_SESSION['UserId'])) {
+        echo "<p>Error: You must be logged in to view this content.</p>";
+        exit;
+    }
 
 // Handle POST requests for forms
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // POST request for assigning tasks to user
-    if (isset($_POST['assignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-        $TaskID = htmlspecialchars($_POST['taskId']);
-        $UserID = $_SESSION['UserId']; // Get the logged-in user's ID from the session
-        $message = assignTaskToUser($conn, $TaskID, $UserID); // Call the function to assign the task
-        echo "<p>$message</p>"; // Display success or error message
-    } 
-    // POST request for marking tasks as completed
-    elseif (isset($_POST['completeTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-        $TaskID = htmlspecialchars($_POST['taskId']);
-        $UserID = $_SESSION['UserId'];
-        $message = markTaskAsComplete($conn, $TaskID, $UserID);
-        echo "<p>$message</p>";
-    } 
-    // POST request for deleting a task
-    elseif (isset($_POST['deleteTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-        $TaskID = htmlspecialchars($_POST['taskId']);
-        $UserID = $_SESSION['UserId'];
-        $message = deleteTask($conn, $TaskID, $UserID); // Call the function to delete the task
-        echo "<p>$message</p>";
-    } 
-    // post request for reassigning tasks
-    elseif (isset($_POST['reassignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
-        $TaskID = htmlspecialchars($_POST['taskId']);
-        $UserID = $_SESSION['UserId'];
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // POST request for assigning tasks to user
+        if (isset($_POST['assignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $TaskID = htmlspecialchars($_POST['taskId']);
+            $UserID = $_SESSION['UserId']; // Get the logged-in user's ID from the session
+            $message = assignTaskToUser($conn, $TaskID, $UserID); // Call the function to assign the task
+            echo "<p>$message</p>"; // Display success or error message
+        } elseif (isset($_POST['completeTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $TaskID = htmlspecialchars($_POST['taskId']);
+            $UserID = $_SESSION['UserId'];
+            $message = markTaskAsComplete($conn, $TaskID, $UserID);
+            echo "<p>$message</p>";  // POST request for marking tasks as completed
+        } elseif (isset($_POST['deleteTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $TaskID = htmlspecialchars($_POST['taskId']);
+            $UserID = $_SESSION['UserId'];
+            $message = deleteTask($conn, $TaskID, $UserID); // Call the function to delete the task
+            echo "<p>$message</p>"; // POST request for deleting a task
+        } elseif (isset($_POST['reassignTask']) && isset($_POST['taskId']) && isset($_SESSION['UserId'])) {
+            $TaskID = htmlspecialchars($_POST['taskId']);
+            $UserID = $_SESSION['UserId']; // post request for reassigning tasks
 
-        try {
-            // Update the Status in the user_tasks table to reset it
-            $stmt = $conn->prepare(
-                "UPDATE user_tasks 
+            try {
+                // Update the Status in the user_tasks table to reset it
+                $stmt = $conn->prepare(
+                    "UPDATE user_tasks 
                 SET Status = 'not completed' 
                 WHERE TaskID = :taskId AND UserID = :userId"
-            );
-            $stmt->execute([
-                'taskId' => $TaskID, 
-                'userId' => $UserID
-            ]);
-            echo "<p>Task reassigned successfully!</p>";
-        } catch (PDOException $e) {
-            echo "<p>Error reassigning task: " . $e->getMessage() . "</p>";
-        }
-    } 
+                );
+                $stmt->execute([
+                    'taskId' => $TaskID,
+                    'userId' => $UserID
+                ]);
+                echo "<p>Task reassigned successfully!</p>";
+            } catch (PDOException $e) {
+                echo "<p>Error reassigning task: " . $e->getMessage() . "</p>";
+            }
+        } elseif (isset($_POST['saveTask'])) { // post request to save amended tasks
+            // Capture the task details from the form
+            $taskId = htmlspecialchars($_POST['taskId']);
+            $category = htmlspecialchars($_POST['category']);
+            $house = htmlspecialchars($_POST['house']);
+            $taskType = htmlspecialchars($_POST['taskType']);
+            $description = htmlspecialchars($_POST['description']);
+            $daily = isset($_POST['daily']) ? intval($_POST['daily']) : 0;
+            $christmas = isset($_POST['christmas']) ? intval($_POST['christmas']) : 0;
+            $userId = $_SESSION['UserId'];
+            ;
 
-    // post request to save amended tasks
-    elseif (isset($_POST['saveTask'])) {
-        // Capture the task details from the form
-    $taskId = htmlspecialchars($_POST['taskId']);
-    $category = htmlspecialchars($_POST['category']);
-    $house = htmlspecialchars($_POST['house']);
-    $taskType = htmlspecialchars($_POST['taskType']);
-    $description = htmlspecialchars($_POST['description']);
-    $daily = isset($_POST['daily']) ? intval($_POST['daily']) : 0;
-    $christmas = isset($_POST['christmas']) ? intval($_POST['christmas']) : 0;
-    $userId = $_SESSION['UserId'];;
-
-        try {
-            // prepare UPDATE query
-            $stmt = $conn->prepare(
-                "UPDATE user_tasks ut
+            try {
+                // prepare UPDATE query
+                $stmt = $conn->prepare(
+                    "UPDATE user_tasks ut
                 JOIN Tasks t ON ut.TaskID = t.TaskID
                 SET 
                     t.Category = :category,
@@ -115,25 +107,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     t.Daily = :daily,
                     t.Christmas = :christmas
                 WHERE ut.TaskID = :taskId AND ut.UserID = :userId"
-            );
+                );
 
-            $stmt->execute([
-                'taskId' => $taskId,
-                'category' => $category,
-                'house' => $house,
-                'taskType' => $taskType,
-                'description' => $description,
-                'daily' => $daily,
-                'christmas' => $christmas,
-                'userId' => $userId
-            ]);
-            echo "<p>Task amended successfully!</p>";
-        } catch (PDOException $e) {
-            echo "<p>Error amending task: " . $e->getMessage() . "</p>";
+                $stmt->execute([
+                    'taskId' => $taskId,
+                    'category' => $category,
+                    'house' => $house,
+                    'taskType' => $taskType,
+                    'description' => $description,
+                    'daily' => $daily,
+                    'christmas' => $christmas,
+                    'userId' => $userId
+                ]);
+                echo "<p>Task amended successfully!</p>";
+            } catch (PDOException $e) {
+                echo "<p>Error amending task: " . $e->getMessage() . "</p>";
+            }
         }
     }
-}
-?>         
+    ?>         
 </nav>
 
 <aside class="menu-list">
@@ -149,10 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <main class="main-display">
     <h1>Instructions</h1>
-    <h3>Under <b>View tasks to add</b> you can view and select the premade tasks from the database and assign them to yourself.<br>
+    <h3>Under <b>View tasks to add</b> you can view and select the premade tasks from the database 
+        and assign them to yourself.<br>
         You can mark them as complete and also delete them from your private to do list.  <br>
         Don't worry, they will reappear in the <b>View tasks to add</b> list so you can also find them again. <br>
-        If you want to amend a specific task, add it first and then under your <b>Dobby's Today list</b> you can edit it.<br>
+        If you want to amend a specific task, add it first and then under your 
+        <b>Dobby's Today list</b> you can edit it.<br>
         Once you've completed a task it will automatically return to view list for use again later !
     </h3>
 
@@ -163,8 +157,8 @@ if (isset($_SESSION['UserId'])) {
         $UserID = $_SESSION['UserId'];
 
     if (isset($_GET['view_database'])) {
-        echo displayTasks($conn);   // Call function to view all tasks 
-    } elseif (isset($_GET['view_tasksToAdd'])) { 
+        echo displayTasks($conn);   // Call function to view all tasks
+    } elseif (isset($_GET['view_tasksToAdd'])) {
         echo displayTasksToAdd($conn, $UserID); // call function to display tasks to add
     } elseif (isset($_GET['view_editTasks'])) {
         echo displayEditTasks($conn, $UserID); // call function to display tasks to add
@@ -172,14 +166,13 @@ if (isset($_SESSION['UserId'])) {
         echo displayCompletedTasks($conn, $UserID); // call function to display completed tasks
     } elseif (isset($_GET['view_xmas'])) {
         echo displayXmas($conn); // call function to display xmas task
-    } 
-?> 
+    }
+    ?> 
         
-<?php
-
-    } if (isset($_GET['view_createTask'])) { 
-        // show form to create new tasks
-        ?>
+    <?php
+} if (isset($_GET['view_createTask'])) {
+    // show form to create new tasks
+    ?>
         <form method="POST" action="index.php?view_createTask">
             <fieldset>
                 <legend>Create New Task</legend>
@@ -237,50 +230,52 @@ if (isset($_SESSION['UserId'])) {
                 <input type="submit" name="createTask" value="Create Task">
             </fieldset>
         </form>
-        <?php
+    <?php
 
  // Handle form submission for creating task
- if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['createTask'])) {
-    // Gather form data
-    $category = htmlspecialchars($_POST['category']);
-    $house = htmlspecialchars($_POST['house']);
-    $taskType = htmlspecialchars($_POST['taskType']);
-    $description = htmlspecialchars($_POST['description']);
-    $daily = intval($_POST['daily']);
-    $christmas = intval($_POST['christmas']);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['createTask'])) {
+       // Gather form data
+        $category = htmlspecialchars($_POST['category']);
+        $house = htmlspecialchars($_POST['house']);
+        $taskType = htmlspecialchars($_POST['taskType']);
+        $description = htmlspecialchars($_POST['description']);
+        $daily = intval($_POST['daily']);
+        $christmas = intval($_POST['christmas']);
 
-    // Insert into database - this creates into tasks and user_tasks now
-    // displayCreateTask();
-    try {
-        $stmt = $conn->prepare
-        ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, CreatedBy) 
-        VALUES (:category, :house, :taskType, :description, :daily, :christmas, :createdBy)");
-        $stmt->execute([
-            'category' => $category,
-            'house' => $house,
-            'taskType' => $taskType,
-            'description' => $description,
-            'daily' => $daily,
-            'christmas' => $christmas,
-            'createdBy' => $UserID
-        ]);
+       // Insert into database - this creates into tasks and user_tasks now
+       // displayCreateTask();
+        try {
+            $stmt = $conn->prepare(
+                "INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, CreatedBy) 
+        VALUES (:category, :house, :taskType, :description, :daily, :christmas, :createdBy)"
+            );
+            $stmt->execute([
+             'category' => $category,
+             'house' => $house,
+             'taskType' => $taskType,
+             'description' => $description,
+             'daily' => $daily,
+             'christmas' => $christmas,
+             'createdBy' => $UserID
+            ]);
 
-// get the new TaskID
-    $TaskID = $conn->lastInsertId(); 
+ // get the new TaskID
+            $TaskID = $conn->lastInsertId();
 
-// insert new taskId into user_tasks table
-    $stmt = $conn->prepare
-        ("INSERT INTO user_tasks (UserID, TaskID, Status)
+ // insert new taskId into user_tasks table
+            $stmt = $conn->prepare(
+                "INSERT INTO user_tasks (UserID, TaskID, Status)
         VALUES (:userId, :taskId, 'Not Completed')
-        ");
-    $stmt->execute([
-        'userId' => $UserID,
-        'taskId' => $TaskID,
-        ]);
+        "
+            );
+            $stmt->execute([
+            'userId' => $UserID,
+            'taskId' => $TaskID,
+            ]);
 
-    echo "<p>Task created successfully!</p>";
+            echo "<p>Task created successfully!</p>";
         } catch (PDOException $e) {
-    echo "<p>Error creating task: " . $e->getMessage() . "</p>";
+            echo "<p>Error creating task: " . $e->getMessage() . "</p>";
         }
     }
 }
@@ -314,7 +309,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['amendTask'])) {
                 // Ensure the form HTML is being echoed
                 $formHtml = displayAmendForm($taskDetails);
                 echo $formHtml;
-
             } else {
                 echo "<p>displayAmendForm function not found.</p>";
             }
