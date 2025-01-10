@@ -35,21 +35,6 @@ function renderTasksTable($rows, $headers, $actionButtons = []) {
 
       $value = $key && isset($row[$key]) ? $row[$key] : 'N/A';
 
-// handling for status column
-
-// if ($key === 'UserTaskStatus' && empty($value)) {
-//   $value = 'Not Completed';
-// }
-
-
-      // if ($key === 'Status') {
-      //   if (isset($row['UserStatus'])) {
-      //     $value = $row['UserStatus']; // takes status from user status on tasks
-      //   } elseif (empty($value)) {
-      //     $value = 'Not Completed'; // fallback for empty status
-      //   }
-      // }
-
 // Ensure 'Status' defaults to 'Not Completed' if empty or missing
 if ($key === 'UserTaskStatus' && (empty($value) || $value === 'N/A')) {
   $value = 'Not Completed';
@@ -58,8 +43,6 @@ if ($key === 'UserTaskStatus' && (empty($value) || $value === 'N/A')) {
       $html .= '<td>' . htmlspecialchars($value) . '</td>';
     }
   
-      
-
    // Add action buttons to Action column
    if (!empty($actionButtons)) {
           $html .= '<td style="text-align: center;">';
@@ -75,31 +58,27 @@ if ($key === 'UserTaskStatus' && (empty($value) || $value === 'N/A')) {
             }
             $html .= '</td>';
           }
-  
           $html .= '</tr>';
       }
       $html .= '</tbody></table>';
-  
       return $html;
   }
 
 // view function to add tasks to UserId
 function displayTasksToAdd($conn, $UserID) {
   try {
-      $stmt = $conn->prepare("
-      SELECT t.*
+      $stmt = $conn->prepare
+      ("SELECT t.*
       FROM Tasks t
       WHERE t.CreatedBy IN (0, :UserID)
       AND t.TaskID NOT IN (
         SELECT ut.TaskID
         FROM user_tasks ut
-        WHERE ut.UserID = :UserID
-        ) 
+        WHERE ut.UserID = :UserID) 
       ");
    
     $stmt->execute(['UserID' => $UserID]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 
     // Define table headers
     $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
@@ -110,10 +89,7 @@ function displayTasksToAdd($conn, $UserID) {
           'label' => 'Assign Task',
           'name' => 'assignTask',
           'condition' => function ($row) {
-
-            // return $row['Status'] === 'Not Completed';
               return true;
-              // $row['UserID'] == 0; // Show only if unassigned
           },
       ],
   ];
@@ -125,7 +101,6 @@ function displayTasksToAdd($conn, $UserID) {
     }
   }
   
-
 // function to add tasks to a userid
 function assignTaskToUser($conn, $TaskID, $UserID) {
   try {
@@ -134,8 +109,7 @@ function assignTaskToUser($conn, $TaskID, $UserID) {
         SELECT :userId, :taskId
         WHERE NOT EXISTS (
         SELECT 1 FROM user_tasks 
-        WHERE UserID = :userId AND TaskID = :taskId
-        )
+        WHERE UserID = :userId AND TaskID = :taskId)
     ");
     $stmt->bindParam(':userId', $UserID, PDO::PARAM_INT);
     $stmt->bindParam(':taskId', $TaskID, PDO::PARAM_INT);
@@ -147,7 +121,6 @@ function assignTaskToUser($conn, $TaskID, $UserID) {
   } 
 }
 
-
 // Fetch tasks assigned to the user that are not completed
 // Dobby's today list
 function displayEditTasks($conn, $UserID) {  
@@ -158,8 +131,8 @@ function displayEditTasks($conn, $UserID) {
           ("SELECT t.*, ut.Status AS UserStatus
           FROM Tasks t
           JOIN user_tasks ut ON t.TaskID = ut.TaskID
-          WHERE ut.UserID = :userId AND ut.Status !='completed'"
-          );
+          WHERE ut.UserID = :userId AND ut.Status !='completed'
+          ");
      $stmt->execute(['userId' => $UserID]);
      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     //  print_r($rows); //debug
@@ -184,7 +157,14 @@ function displayEditTasks($conn, $UserID) {
           'label' => 'Delete Task',
           'name' => 'deleteTask',
           'condition' => function ($row) {
-              return true; // Always show
+              return true; 
+              },
+        ],
+        [
+          'label' => 'Amend Task',
+          'name' => 'amendTask',
+          'condition' => function ($row) {
+              return true; 
               },
         ],
     ];
@@ -200,14 +180,10 @@ function markTaskAsComplete($conn, $TaskID, $UserID) {
   try {
       // Update the task's status to "completed"
       $stmt = $conn->prepare
-        // ("UPDATE Tasks t
-        // INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        // SET t.Status = 'completed'
-        // WHERE ut.TaskID = :taskId AND ut.UserID = :userId");
         ("UPDATE user_tasks
         SET STATUS = 'completed'
-        WHERE TaskID = :taskId AND UserID = :userId"
-        );
+        WHERE TaskID = :taskId AND UserID = :userId
+        ");
       $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
 
       return "Task marked as completed successfully!";
@@ -224,13 +200,9 @@ function displayCompletedTasks($conn, $UserID) {
         ("SELECT t.*, ut.Status AS UserTaskStatus
         FROM Tasks t
         INNER JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        WHERE ut.UserID = :userId AND ut.Status = 'completed'"
-        );
-        // ("SELECT t.*, ut.Status as UserStatus
-        // FROM Tasks t
-        // JOIN user_tasks ut ON t.TaskID = ut.TaskID
-        // WHERE ut.UserID = :userId AND ut.Status = 'Completed'");
-    // -- AND Status = :completed
+        WHERE ut.UserID = :userId AND ut.Status = 'completed'
+        ");
+        
     $stmt->execute(['userId' => $UserID]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -239,10 +211,10 @@ function displayCompletedTasks($conn, $UserID) {
   }
 
    // Define table headers
-   $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
+    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
 
      // Define action buttons
-     $actionButtons = [
+    $actionButtons = [
       [
           'label' => 'Reassign Task',
           'name' => 'reassignTask',
@@ -259,118 +231,99 @@ function displayCompletedTasks($conn, $UserID) {
    }
  }
 
-
- function deleteTask($conn, $TaskID, $UserID) {
-  try {
-      // Delete the task assigned to the user
-      $stmt = $conn->prepare
-        ("DELETE FROM user_tasks
-        WHERE TaskID = :taskId AND UserID = :userId"
-        );
-      $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
-
-      return "Task deleted successfully!";
-  } catch (PDOException $e) {
-      return "Error deleting task: " . $e->getMessage();
-  }
-}
-
-// create own tasks function unique to UserID
-function displayCreateTask($conn, $UserID, $Category, $House, $TaskType, $Description, $Daily, $Christmas) {
+function deleteTask($conn, $TaskID, $UserID) {
 try {
-  //insert new task into Tasks table
-  $stmt = $conn->prepare
-    ("INSERT INTO Tasks (Category, House, TaskType, Description, Daily, Christmas, Status, CreatedBy)
-    VALUE (:category, :house, :taskType, :description, :daily, :christmas, 'Not Completed', :createdBy)"
-    );
-  $stmt->execute([
-    'category' => $Category,
-    'house' => $House,
-    'taskType' => $TaskType,
-    'description' => $Description,
-    'daily' => $Daily,
-    'christmas' => $Christmas,
-    'createdBy' => $UserID
-  ]);
+  // Delete the task assigned to the user
+    $stmt = $conn->prepare
+      ("DELETE FROM user_tasks
+      WHERE TaskID = :taskId AND UserID = :userId
+      ");
+    $stmt->execute(['taskId' => $TaskID, 'userId' => $UserID]);
 
-  // get the new TaskID
-  $TaskID = $conn->lastInsertId(); 
-  // insert new taskId into user_tasks table
-  $stmt = $conn->prepare(
-    "INSERT INTO user_tasks (UserID, TaskID, Status)
-    VALUES (:userId, :taskId, 'Not Completed')"
-  );
-  $stmt->execute([
-    'userId' => $UserID,
-    'taskId' => $TaskID,
-  ]);
-
-  return "Task created and assigned to the user successfully!";
-} catch (PDOException $e) {
-    return "Error creating task: " . $e->getMessage();
-}
-}
-
-
-
- // Start of VIEW XMAS Themed tasks function
-function displayXmas($conn) {
-  try {
-  $sortColumn = isset($_GET['column']) ? htmlspecialchars($_GET['column']) : 'Christmas'; // Default sorting column
-  $stmt = $conn->query("SELECT * FROM Tasks WHERE Christmas = 1") ; // Assuming 'Christmas' is a boolean field
-  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  
-    // Define table headers
-    $headers = ['Category', 'House', 'Task Type', 'Description', 'Status'];
-  
-    // Use the renderTasksTable function to generate the table
-    return renderTasksTable($rows, $headers);
-    } catch (PDOException $e) {
-    return "<p>Error retrieving tasks: " . $e->getMessage() . "</p>";
-    }
+    return "Task deleted successfully!";
+  } catch (PDOException $e) {
+    return "Error deleting task: " . $e->getMessage();
   }
-  // End of VIEW XMAS function
+}
 
-// Start of VIEW DATABASE function
-// CRUD READ - View - this function views full database
-function displayTasks($conn) {
+// amend own tasks function unique to UserID
+function displayAmendForm($taskDetails) {
+  $Categories = array("wand practice", "wizard dual", "owl post", "enchanted books", "potions master", "magical creatures", "marauder's map", "quidditch training", "own");
+  $Houses = array("griffindor", "ravenclaw", "huffelpuff", "slytherin", "own");
+  $TaskTypes = array("learn a new skill", "take care of plants and pets", "challenge yourself", "keep in touch", "read a book or blog", "cooking and baking", "planning trips and outings", "stay active", "help someone", "own");
 
-  // Check if a column is selected for sorting
-  $sortColumn = isset($_GET['column']) ? $_GET['column'] : 'Daily'; // Default sorting column
-  $stmt = $conn->query("SELECT * FROM Tasks ORDER BY $sortColumn"); // Sort by selected column
-  $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  
-  $output = '<h2>All Database Tasks</h2><br>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>House</th>
-                    <th>Task Type</th>
-                    <th>Description</th>
-                    <th>Daily</th>
-                    <th>Christmas</th>
-                  </tr>
-                </thead>
-   
-   <tb>'; // Start a table
-  
-  // Loop to display all the tasks in the database
-  foreach ($rows as $row) {
-    $output .= '<tr>
-                  <td>' . htmlspecialchars($row['Category']) . '</td>
-                  <td>' . htmlspecialchars($row['House']) . '</td>
-                  <td>' . htmlspecialchars($row['TaskType']) . '</td>
-                  <td>' . htmlspecialchars($row['Description']) . '</td>
-                  <td>' . htmlspecialchars($row['Daily']) . '</td>
-                  <td>' . htmlspecialchars($row['Christmas']) . '</td>
-                  </tr>';
-                  // Example of displaying task name
-    }
-  
-    $output .= '</tbody><table>'; 
-    return $output; // Return the output string
-  
+  $categoryOptions = "";
+  $houseOptions = "";
+  $taskTypeOptions = "";
+
+  foreach ($Categories as $Category) {
+    $selected = $taskDetails['Category'] === $Category ? 'selected' : '';
+    $categoryOptions .= "<option value='$Category' $selected>$Category</option>";
   } 
-  // End of VIEW DATABASE function
+
+  foreach ($Houses as $House) {
+    $selected = $taskDetails['House'] === $House ? 'selected' : '';
+    $houseOptions .= "<option value='$House' $selected>$House</option>";
+}
+
+  foreach ($TaskTypes as $TaskType) {
+    $selected = $taskDetails['TaskType'] === $TaskType ? 'selected' : '';
+    $taskTypeOptions .= "<option value='$TaskType' $selected>$TaskType</option>";
+}
+
+    $description = htmlspecialchars($taskDetails['Description'] ?? '', ENT_QUOTES);
+
+    $dailyCheckedYes = isset($taskDetails['Daily']) && $taskDetails['Daily'] == 1 ? 'checked' : '';
+    $dailyCheckedNo = isset($taskDetails['Daily']) && $taskDetails['Daily'] == 0 ? 'checked' : '';
+
+    $christmasCheckedYes = isset($taskDetails['Christmas']) && $taskDetails['Christmas'] == 1 ? 'checked' : '';
+    $christmasCheckedNo = isset($taskDetails['Christmas']) && $taskDetails['Christmas'] == 0 ? 'checked' : '';
+
+// Print the form using echo with PHP variables
+echo '
+<form method="POST" action="index.php?view_amendTask">
+  <fieldset>
+      <legend>Amend Task</legend>
+
+      <!-- Hidden task ID field -->
+      <input type="hidden" name="taskId" value="' . htmlspecialchars($taskDetails['TaskID']) . '">
+
+      <label for="category">Select Category:</label>
+      <select id="category" name="category">
+        ' . $categoryOptions . '
+      </select>
+      <br><br>
+
+      <label for="house">Select House:</label>      
+      <select id="house" name="house">
+        ' . $houseOptions . '
+      </select> 
+      <br><br> 
+
+      <label for="taskType">Task Type:</label>
+      <select id="taskType" name="taskType">
+        ' . $taskTypeOptions . '  
+      </select> 
+      <br><br>
+
+      <label for="description">Description:</label>
+      <textarea name="description" required>' . htmlspecialchars($description) . '</textarea>
+      <br><br>
+
+      <label for="daily">Daily Task:</label>
+      <input type="radio" name="daily" value="1" ' . $dailyCheckedYes . '> Yes
+      <input type="radio" name="daily" value="0" ' . $dailyCheckedNo . '> No
+      <br><br>
+
+      <label for="christmas">Christmas Task:</label>
+      <input type="radio" name="christmas" value="1" ' . $christmasCheckedYes . '> Yes
+      <input type="radio" name="christmas" value="0" ' . $christmasCheckedNo . '> No
+      <br><br>
+
+      <input type="submit" name="saveTask" value="Save Task">
+  </fieldset>
+</form>
+';
+}
+
 ?>
