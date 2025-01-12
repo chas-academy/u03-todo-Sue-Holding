@@ -3,7 +3,9 @@
 # Project structure
 
 ## Idea - 
-My idea is based on a simple list of tasks that are saved in a databse and upon starting a log-in session the user can add tasks to their list and click once they are completed. It will also allow them to create their own tasks, delete tasks and make edits to existing.
+My idea is based on a simple list of tasks that are saved in a database and upon starting a log-in session the user can add tasks to their user account.
+They will be able to Mark the task as Complete, amend the task and save it, delete the task from their user account and also create a new task saved only to themselves.
+
 It will be Harry potter themed and include some Christmas themed tasks.
 
 ## Plan - 
@@ -34,7 +36,13 @@ Week 1 - 2. Application to be in a working function, with maybe some fine tuning
 ## Retro Perspective - 
 Week 2 -
 Look back at the project: What went well? What went bad? How can I do it differently in my next project?
+I feel that my project is structured quite well and all the functions work as intended. I would like to have restructed 
+the code into OOP for a cleaner and easier to read format.
 Feature expansion - any other desired features to implement?
+Currently the amend task function allows the user to update the intended task successfully, however it updated the task into the 
+main Task table database which causes other users to also see this change. 
+I would have liked to work on this function so that amendments made to a task would created a dupplicate amended version saved only to the user
+so that the original task is left untouched and available to other users upon log-in.
 
 Link to Figma for ER-diagram 
 https://www.figma.com/design/IbF5MVSAe7AfwUPpZbyZ8M/ER-Diagram-To-Do-List?node-id=0-1&p=f&t=9EC8nk7DR4qQpT81-0
