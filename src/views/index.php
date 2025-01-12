@@ -324,14 +324,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['amendTask'])) {
 </main>
 
 <footer>
-<!-- <audio class="song"
+<audio class="song"
     controls
     width="200"
     height="100"
     autoplay
     loop
     preload="off">
-  <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" /> -->
+  <source src="../media/Harry_Potter_Themesong.mp3" type="audio/mp3" />
 </footer>
 
 </div> 

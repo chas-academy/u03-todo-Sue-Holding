@@ -36,14 +36,21 @@ Week 1 - 2. Application to be in a working function, with maybe some fine tuning
 ## Retro Perspective - 
 Week 2 -
 Look back at the project: What went well? What went bad? How can I do it differently in my next project?
-I feel that my project is structured quite well and all the functions work as intended. I would like to have restructed 
+I feel that my project is structured quite well and all the functions work as intended. I would like to have restructed
 the code into OOP for a cleaner and easier to read format.
 Feature expansion - any other desired features to implement?
-Currently the amend task function allows the user to update the intended task successfully, however it updated the task into the 
-main Task table database which causes other users to also see this change. 
+Currently the amend task function allows the user to update the intended task successfully, however it updated the task into the
+main Task table database which causes other users to also see this change.
 I would have liked to work on this function so that amendments made to a task would created a dupplicate amended version saved only to the user
 so that the original task is left untouched and available to other users upon log-in.
 
+I have also corrected my code to the PSR-12 standards but have a warning that I am unable to solve.
+
+FILE: /var/www/html/src/functions/crud.php
+FILE: /var/www/html/src/views/submit.php
+-------------------------------------------------------------------------------------------------------------------------------------------| WARNING | A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 8 and the first side effect is on line 3.
+
+Here are the links to my design sketch and ER diagram in Figma. They are also saved as image attachments to the project.
 Link to Figma for ER-diagram 
 https://www.figma.com/design/IbF5MVSAe7AfwUPpZbyZ8M/ER-Diagram-To-Do-List?node-id=0-1&p=f&t=9EC8nk7DR4qQpT81-0
 
